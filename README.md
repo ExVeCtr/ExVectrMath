@@ -1,4 +1,4 @@
-# ExVectrHAL
+# ExVectrMath
 Part of the ExVeCtr project. 
 ExVectrMath implements high level mathematics like Matricies, vectors, quaternions etc.
 Can be used standalone without any other ExVeCtr libraries. 
