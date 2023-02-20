@@ -43,20 +43,6 @@ public:
      */
     Matrix(TYPE value);
 
-    /**
-     * An array can be given as so: 
-     * float array[] = {
-     *  2,2,
-     *  2,2,
-     *  2,2
-     * };
-     * Matrix a(array);
-     * And the matrix will be filled with the given values.
-     * Warning: array must have correct size or undetermined values will be written into matrix.
-     * @param array Array containing values.
-     */
-    Matrix(const TYPE const* array);
-
 
     /**
      * Conversion constructor. Converts given matrix into type that this matrix is (e.g float -> int)
@@ -259,6 +245,12 @@ public:
     Matrix<TYPE, ROWS, COLS> operator = (const Matrix<TYPE2, ROWS, COLS>& right);
 
     /**
+     * Places array into matrix
+     */ 
+    //template<typename TYPE2>
+    //Matrix<TYPE, ROWS, COLS> operator = (const TYPE2* array);
+
+    /**
      * @brief If the two matricies have the exact same values
      * 
      * @tparam TYPE2 
@@ -322,16 +314,6 @@ Matrix<TYPE, ROWS, COLS>::Matrix(TYPE val) {
 
         }
     }  
-
-}
-
-
-template<typename TYPE, size_t ROWS, size_t COLS>
-Matrix<TYPE, ROWS, COLS>::Matrix(const TYPE const* array) {
-
-    static_assert((ROWS > 0 && COLS > 0), "Matrix must be at least 1X1. Number of Rows or Columns or both are 0.");
-
-    for (size_t i = 0; i < getNumValues(); i++) (*this)(i) = array[i];
 
 }
 
@@ -886,6 +868,17 @@ Matrix<TYPE, ROWS, COLS> Matrix<TYPE, ROWS, COLS>::operator = (const Matrix<TYPE
     return *this;
 
 }
+
+/*
+template<typename TYPE, size_t ROWS, size_t COLS>
+template<typename TYPE2>
+Matrix<TYPE, ROWS, COLS> Matrix<TYPE, ROWS, COLS>::operator = (const TYPE2* array) {
+
+    for (size_t i = 0; i < getNumValues(); i++) (*this)(i) = static_cast<TYPE>(array[i]);
+
+    return *this;
+    
+}*/
 
 template<typename TYPE, size_t ROWS, size_t COLS>
 template<typename TYPE2>
