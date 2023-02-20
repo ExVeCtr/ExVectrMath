@@ -4,6 +4,6 @@ ExVectrMath implements high level mathematics like Matricies, vectors, quaternio
 Can be used standalone without any other ExVeCtr libraries. 
 ## **This project is under initial development. Things will probably break.**
 ## Current goal roadmap:
-- [ ] Port from previous projects.
-- [ ] Implement more stuff
+- [X] Port from previous projects.
+- [ ] Implement more stuff like FFT etc.
 - [ ] Documentation.
