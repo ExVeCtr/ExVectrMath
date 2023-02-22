@@ -54,13 +54,9 @@ public:
 
     /**
      * Conversion constructor. Copies given matrix but only a part of it or all of it depending on size.
-     * @param matrix Which matrix to copy.
-     * @param startingRow At which row to start copying from/to. Defaults to 0.
-     * @param startingColumn At which column to start copying from/to. Defaults to 0.
-     * @param mode If true then the starting row/column is the matrix getting written to (this). Defaults to false.
      */
     template<typename TYPE2, size_t ROWS2, size_t COLS2>
-    Matrix(const Matrix<TYPE2, ROWS2, COLS2>& matrix, size_t startingRow, size_t startingColumn = 0, bool mode = false);
+    Matrix(size_t rowStart, size_t colStart, const Matrix<TYPE2, ROWS2, COLS2>& mat);
 
 
     /**
@@ -113,7 +109,7 @@ public:
     /**
      * @returns transposed matrix.
      */
-    Matrix<TYPE, COLS, ROWS> transpose() const;
+    Matrix<TYPE, COLS, ROWS> getTranspose() const;
 
     /**
      * @returns matrix determinant.
@@ -138,7 +134,7 @@ public:
      * Used Gauß-Jordan method from https://www.geeksforgeeks.org/finding-inverse-of-a-matrix-using-gauss-jordan-method/
      * @returns inverse of matrix.
      */
-    Matrix<TYPE, ROWS, COLS> invert() const;
+    Matrix<TYPE, ROWS, COLS> getInverse() const;
 
     /**
      * @brief Get the Diagonal vector of a square matrix
@@ -186,8 +182,26 @@ public:
     const TYPE& operator () (size_t row, size_t column) const;
 
     
-    template<size_t ROWS2, size_t COLS2>
-    Matrix<TYPE, ROWS2, COLS2> block(size_t row, size_t col);
+    /**
+     * Returns part of the matrix.
+     * E.g. Matrix<3, 3>::getBlock<2,2>(1, 1); gets the positions marked x:
+     * o o o
+     * o x x
+     * 0 x x
+    */
+    template<typename TYPE2, size_t ROWS2, size_t COLS2>
+    Matrix<TYPE2, ROWS2, COLS2> block(size_t rowStart, size_t colStart);
+
+    /**
+     * Sets part of the matrix using the given ones values.
+     * E.g. Matrix<3, 3>::setBlock<2,2>(1, 1, Matrix<2, 2>); sets the positions marked x:
+     * o o o
+     * o x x
+     * 0 x x
+     * using Matrix<2, 2>'s values.
+    */
+    template<typename TYPE2, size_t ROWS2, size_t COLS2>
+    void block(size_t rowStart, size_t colStart, const Matrix<TYPE2, ROWS2, COLS2>& mat);
 
 
     /**
@@ -335,33 +349,8 @@ Matrix<TYPE, ROWS, COLS>::Matrix(const Matrix<TYPE2, ROWS, COLS>& matrix) {
 
 template<typename TYPE, size_t ROWS, size_t COLS>
 template<typename TYPE2, size_t ROWS2, size_t COLS2>
-Matrix<TYPE, ROWS, COLS>::Matrix(const Matrix<TYPE2, ROWS2, COLS2>& matrix, size_t startingRow, size_t startingColumn, bool mode) {
-
-
-    if (mode) {
-
-        for (size_t row = 0; row < startingRow + ROWS; row++) {
-            for (size_t col = 0; col < startingColumn + COLS; col++) {
-                
-                if (row > startingRow && col > startingColumn) (*this)(row, col) = matrix(row + startingRow, col + startingColumn);
-                else (*this)(row, col) = 0;
-
-            }
-        } 
-
-    } else {
-
-        for (size_t row = 0; row < ROWS; row++) {
-            for (size_t col = 0; col < COLS; col++) {
-
-                if (row + startingRow > ROWS2-1 || col + startingColumn > COLS2-1) (*this)(row, col) = 0;
-                else (*this)(row, col) = matrix(row + startingRow, col + startingColumn);
-
-            }
-        } 
-
-    }
-
+Matrix<TYPE, ROWS, COLS>::Matrix(size_t rowStart, size_t colStart, const Matrix<TYPE2, ROWS2, COLS2>& mat) : Matrix() {
+    block(rowStart, colStart, mat);
 }
 
 
@@ -420,7 +409,7 @@ Matrix<TYPE, ROWS, COLS> Matrix<TYPE, ROWS, COLS>::copy() const {
 
 
 template<typename TYPE, size_t ROWS, size_t COLS>
-Matrix<TYPE, COLS, ROWS> Matrix<TYPE, ROWS, COLS>::transpose() const {
+Matrix<TYPE, COLS, ROWS> Matrix<TYPE, ROWS, COLS>::getTranspose() const {
 
     Matrix<TYPE, COLS, ROWS> m;
 
@@ -438,7 +427,7 @@ Matrix<TYPE, COLS, ROWS> Matrix<TYPE, ROWS, COLS>::transpose() const {
 
 
 template<typename TYPE, size_t ROWS, size_t COLS>
-Matrix<TYPE, ROWS, COLS> Matrix<TYPE, ROWS, COLS>::invert() const {
+Matrix<TYPE, ROWS, COLS> Matrix<TYPE, ROWS, COLS>::getInverse() const {
 
     static_assert((ROWS == COLS), "Matrix must be square (NxN) in order to get inverse. Pseudoinverse might solve the issue.");
 
@@ -652,19 +641,18 @@ const TYPE& Matrix<TYPE, ROWS, COLS>::operator () (size_t row, size_t column) co
 
 
 template<typename TYPE, size_t ROWS, size_t COLS>
-template<size_t ROWS2, size_t COLS2>
-Matrix<TYPE, ROWS2, COLS2> Matrix<TYPE, ROWS, COLS>::block(size_t row, size_t col) {
+template<typename TYPE2, size_t ROWS2, size_t COLS2>
+Matrix<TYPE2, ROWS2, COLS2> Matrix<TYPE, ROWS, COLS>::block(size_t rowStart, size_t colStart) {
 
     Matrix<TYPE, ROWS2, COLS2> blockMat;
 
-    for (size_t rw = row; rw < ROWS && rw < ROWS2 + row; rw++) {
+    for (size_t rw = rowStart; rw < ROWS && rw < ROWS2 + rowStart; rw++) {
 
-        for (size_t cw = col; cw < COLS && cw < COLS2 + col; cw++) {
+        for (size_t cw = colStart; cw < COLS && cw < COLS2 + colStart; cw++) {
 
-            blockMat.r[rw-row][cw-col] = r[rw][cw];
+            blockMat.r[rw-rowStart][cw-colStart] = r[rw][cw];
         
         }
-
 
     }
 
@@ -673,9 +661,26 @@ Matrix<TYPE, ROWS2, COLS2> Matrix<TYPE, ROWS, COLS>::block(size_t row, size_t co
 }
 
 
+template<typename TYPE, size_t ROWS, size_t COLS>
+template<typename TYPE2, size_t ROWS2, size_t COLS2>
+void Matrix<TYPE, ROWS, COLS>::block(size_t rowStart, size_t colStart, const Matrix<TYPE2, ROWS2, COLS2>& mat) {
+
+    for (size_t rw = rowStart; rw < ROWS && rw < ROWS2-rowStart; rw++) {
+
+        for (size_t cw = colStart; cw < COLS && cw < COLS2-colStart; cw++) {
+
+            this->r[rw][cw] = mat.r[rw-rowStart][cw-colStart];
+        
+        }
+
+    }
+
+}
+
+
 /**
- * Uses given function to print itsself.
- * @param printf Function to receive a const char*
+ * Uses given function to print itself. Expected to work like a normal printf function.
+ * @param printf Function pointer to receive a const char* for format and parameters. 
 */
 template<typename TYPE, size_t ROWS, size_t COLS>
 void Matrix<TYPE, ROWS, COLS>::printTo(void (*printf)(const char*, ...)) {
@@ -830,20 +835,14 @@ Matrix<TYPE, ROWS, RIGHTCOLS> Matrix<TYPE, ROWS, COLS>::operator * (const Matrix
 
     Matrix<TYPE, ROWS, RIGHTCOLS> m;
 
-    TYPE val = 0;
-
     for (size_t lr = 0; lr < ROWS; lr++) {
         for (size_t rc = 0; rc < RIGHTCOLS; rc++) {
 
-            val = 0;
-
             for (size_t i = 0; i < COLS; i++) {
 
-                val += this->r[lr][i] * right.r[i][rc];
+                m.r[lr][rc] = m.r[lr][rc] + this->r[lr][i] * right.r[i][rc];
 
             }
-
-            m.r[lr][rc] = val;
 
         }
     }  

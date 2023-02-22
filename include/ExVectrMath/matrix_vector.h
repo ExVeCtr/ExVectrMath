@@ -10,7 +10,7 @@ namespace Math {
 /**
  * Nx1 Matrix class for vectors.
  */
-template<typename TYPE, uint16_t ROWS>
+template<typename TYPE, size_t ROWS>
 class Vector: public Matrix<TYPE, ROWS, 1> {
 public:
 
@@ -69,26 +69,25 @@ public:
 };
 
 
-template<typename TYPE, uint16_t ROWS>
+template<typename TYPE, size_t ROWS>
 Vector<TYPE, ROWS>::Vector() {
-    for (uint16_t i = 0; i < ROWS; i++) this->r[i][0] = 0.0f;
+    for (size_t i = 0; i < ROWS; i++) this->r[i][0] = 0.0f;
 }
 
-
-template<typename TYPE, uint16_t ROWS>
+template<typename TYPE, size_t ROWS>
 Vector<TYPE, ROWS>::Vector(const TYPE& value) {
-    for (uint16_t i = 0; i < ROWS; i++) this->r[i][0] = value;
+    for (size_t i = 0; i < ROWS; i++) this->r[i][0] = value;
 }
 
 
-template<typename TYPE, uint16_t ROWS>
+template<typename TYPE, size_t ROWS>
 template<typename TYPE2>
 Vector<TYPE, ROWS>::Vector(const Matrix<TYPE2, ROWS, 1>& vectorMatrix) {
-    for (uint16_t i = 0; i < ROWS; i++) this->r[i][0] = vectorMatrix[i][0];
+    for (size_t i = 0; i < ROWS; i++) this->r[i][0] = vectorMatrix[i][0];
 }
 
 
-template<typename TYPE, uint16_t ROWS>
+template<typename TYPE, size_t ROWS>
 template<typename TYPE2>
 Vector<TYPE, 3> Vector<TYPE, ROWS>::cross(const Vector<TYPE2, 3>& vecB) const {
 
@@ -104,33 +103,33 @@ Vector<TYPE, 3> Vector<TYPE, ROWS>::cross(const Vector<TYPE2, 3>& vecB) const {
 }
 
 
-template<typename TYPE, uint16_t ROWS>
+template<typename TYPE, size_t ROWS>
 template<typename TYPE2>
 TYPE Vector<TYPE, ROWS>::getAngleTo(const Vector<TYPE2, ROWS>& vecB) const {
     return acos(((*this) * vecB) / ((*this).magnitude() * vecB.magnitude()));
 }
 
 
-template<typename TYPE, uint16_t ROWS>
+template<typename TYPE, size_t ROWS>
 template<typename TYPE2>
 Vector<TYPE, ROWS> Vector<TYPE, ROWS>::getProjectionOn(const Vector<TYPE2, ROWS>& vecB) const {
     return ((*this) * vecB) / (vecB * vecB) * vecB;
 }
 
 
-template<typename TYPE, uint16_t ROWS>
+template<typename TYPE, size_t ROWS>
 template<typename TYPE2>
 TYPE Vector<TYPE, ROWS>::operator*(const Vector<TYPE2, ROWS>& vecB) const {
     return (*this).transpose() * vecB;
 }
 
 /*
-template<typename TYPE, uint16_t ROWS>
-TYPE Vector<TYPE, ROWS>::magnitude(uint16_t startIndex, uint16_t endIndex) {
+template<typename TYPE, size_t ROWS>
+TYPE Vector<TYPE, ROWS>::magnitude(size_t startIndex, size_t endIndex) {
 
     TYPE temp = 0;
 
-    for (uint16_t i = startIndex; i <= endIndex; i++) {
+    for (size_t i = startIndex; i <= endIndex; i++) {
 
         temp = this->r[i][0]*this->r[i][0];
 
@@ -141,14 +140,14 @@ TYPE Vector<TYPE, ROWS>::magnitude(uint16_t startIndex, uint16_t endIndex) {
 }
 
 
-template<typename TYPE, uint16_t ROWS>
-Vector<TYPE, ROWS> Vector<TYPE, ROWS>::normalize(uint16_t startIndex, uint16_t endIndex) {
+template<typename TYPE, size_t ROWS>
+Vector<TYPE, ROWS> Vector<TYPE, ROWS>::normalize(size_t startIndex, size_t endIndex) {
 
     TYPE mag = magnitude(startIndex, endIndex);
 
     Vector<TYPE, ROWS> normalisedVector;
 
-    for (uint16_t i = startIndex; i <= endIndex; i++) {
+    for (size_t i = startIndex; i <= endIndex; i++) {
 
         this->r[i][0] = this->r[i][0]/mag;
 
