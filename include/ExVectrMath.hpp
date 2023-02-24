@@ -2,10 +2,10 @@
 #define EXVECTRMATH_H_
 
 
-#include "ExVectrMath/matrix_base.h"
-#include "ExVectrMath/matrix_types.h"
-#include "ExVectrMath/matrix_vector.h"
-#include "ExVectrMath/matrix_quaternion.h"
+#include "ExVectrMath/matrix_base.hpp"
+#include "ExVectrMath/matrix_types.hpp"
+#include "ExVectrMath/matrix_vector.hpp"
+#include "ExVectrMath/matrix_quaternion.hpp"
 
 
 
