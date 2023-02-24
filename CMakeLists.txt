@@ -8,3 +8,5 @@ target_include_directories(${PROJECT_NAME} PUBLIC include/)
 function(addExVectrDependency libName)
     target_include_directories(${PROJECT_NAME} PUBLIC ../${libName}/include/)
 endfunction()
+
+addExVectrDependency(ExVectrCore)
