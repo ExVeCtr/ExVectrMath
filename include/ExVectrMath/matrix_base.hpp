@@ -24,6 +24,11 @@ namespace VCTR
              */
             TYPE r[ROWS][COLS];
 
+            /// @brief Number of rows of this matrix
+            static const size_t rows = ROWS;
+            /// @brief Number of columns of this matrix
+            static const size_t cols = COLS;
+
             /**
              * Below are constructors.
              */
@@ -77,19 +82,9 @@ namespace VCTR
              */
 
             /**
-             * @returns total number of values the matrix has.
+             * @returns number of values a matrix has or ROWS * COLS
              */
-            size_t getNumRows() const;
-
-            /**
-             * @returns number of rows a matrix has.
-             */
-            size_t getNumColumns() const;
-
-            /**
-             * @returns number of columns a matrix has.
-             */
-            uint32_t getNumValues() const;
+            size_t getNumValues() const;
 
             /**
              * @returns a copy of the matrix.
@@ -182,8 +177,8 @@ namespace VCTR
              * o x x
              * 0 x x
              */
-            template <typename TYPE2, size_t ROWS2, size_t COLS2>
-            Matrix<TYPE2, ROWS2, COLS2> block(size_t rowStart, size_t colStart);
+            template <size_t ROWS2, size_t COLS2>
+            Matrix<TYPE, ROWS2, COLS2> block(size_t rowStart, size_t colStart) const;
 
             /**
              * Sets part of the matrix using the given ones values.
@@ -194,7 +189,7 @@ namespace VCTR
              * using Matrix<2, 2>'s values.
              */
             template <typename TYPE2, size_t ROWS2, size_t COLS2>
-            Matrix<TYPE, ROWS, COLS>& block(const Matrix<TYPE2, ROWS2, COLS2> &mat, size_t rowStart = 0, size_t colStart = 0);
+            Matrix<TYPE, ROWS, COLS> &block(const Matrix<TYPE2, ROWS2, COLS2> &mat, size_t rowStart = 0, size_t colStart = 0);
 
             /**
              * Uses given function to print itsself.
@@ -278,6 +273,12 @@ namespace VCTR
             template <typename TYPE2>
             bool operator!=(const Matrix<TYPE2, ROWS, COLS> &right);
         };
+
+        template <typename TYPE, size_t ROWS, size_t COLS>
+        const size_t Matrix<TYPE, ROWS, COLS>::rows = ROWS;
+
+        template <typename TYPE, size_t ROWS, size_t COLS>
+        const size_t Matrix<TYPE, ROWS, COLS>::cols = COLS;
 
         /**
          * Below are the implementations of all above functions.
@@ -371,19 +372,7 @@ namespace VCTR
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
-        size_t Matrix<TYPE, ROWS, COLS>::getNumRows() const
-        {
-            return ROWS;
-        }
-
-        template <typename TYPE, size_t ROWS, size_t COLS>
-        size_t Matrix<TYPE, ROWS, COLS>::getNumColumns() const
-        {
-            return COLS;
-        }
-
-        template <typename TYPE, size_t ROWS, size_t COLS>
-        uint32_t Matrix<TYPE, ROWS, COLS>::getNumValues() const
+        size_t Matrix<TYPE, ROWS, COLS>::getNumValues() const
         {
             return (uint32_t)ROWS * COLS;
         }
@@ -492,7 +481,6 @@ namespace VCTR
             }
 
             return matrix.block<float, ROWS, COLS>(0, COLS);
-            
         }
 
         /*template<>
@@ -629,8 +617,8 @@ namespace VCTR
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
-        template <typename TYPE2, size_t ROWS2, size_t COLS2>
-        Matrix<TYPE2, ROWS2, COLS2> Matrix<TYPE, ROWS, COLS>::block(size_t rowStart, size_t colStart)
+        template <size_t ROWS2, size_t COLS2>
+        Matrix<TYPE, ROWS2, COLS2> Matrix<TYPE, ROWS, COLS>::block(size_t rowStart, size_t colStart) const
         {
 
             Matrix<TYPE, ROWS2, COLS2> blockMat;
@@ -650,7 +638,7 @@ namespace VCTR
 
         template <typename TYPE, size_t ROWS, size_t COLS>
         template <typename TYPE2, size_t ROWS2, size_t COLS2>
-        Matrix<TYPE, ROWS, COLS>& Matrix<TYPE, ROWS, COLS>::block(const Matrix<TYPE2, ROWS2, COLS2> &mat, size_t rowStart, size_t colStart)
+        Matrix<TYPE, ROWS, COLS> &Matrix<TYPE, ROWS, COLS>::block(const Matrix<TYPE2, ROWS2, COLS2> &mat, size_t rowStart, size_t colStart)
         {
 
             for (size_t rw = rowStart; rw < ROWS && rw < ROWS2 - rowStart; rw++)
@@ -664,7 +652,6 @@ namespace VCTR
             }
 
             return *this;
-
         }
 
         /**
