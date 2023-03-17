@@ -24,11 +24,6 @@ namespace VCTR
              */
             TYPE r[ROWS][COLS];
 
-            /// @brief Number of rows of this matrix
-            static const size_t rows = ROWS;
-            /// @brief Number of columns of this matrix
-            static const size_t cols = COLS;
-
             /**
              * Below are constructors.
              */
@@ -273,12 +268,6 @@ namespace VCTR
             template <typename TYPE2>
             bool operator!=(const Matrix<TYPE2, ROWS, COLS> &right);
         };
-
-        template <typename TYPE, size_t ROWS, size_t COLS>
-        const size_t Matrix<TYPE, ROWS, COLS>::rows = ROWS;
-
-        template <typename TYPE, size_t ROWS, size_t COLS>
-        const size_t Matrix<TYPE, ROWS, COLS>::cols = COLS;
 
         /**
          * Below are the implementations of all above functions.
