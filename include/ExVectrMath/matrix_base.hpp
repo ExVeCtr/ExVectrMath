@@ -133,6 +133,23 @@ namespace VCTR
             Matrix<TYPE, ROWS, 1> diagonal() const;
 
             /**
+             * @brief Calculates this matrix to power given.
+             * @note Only powers > 0!
+             * 
+             * @return Matrix<TYPE, ROWS, COLS>
+             */
+            Matrix<TYPE, ROWS, COLS> pow(size_t power) const;
+
+            /**
+             * @brief Calculates e to power of this matrix. 
+             * @note Approximate calculation. Use increase param iterations for slower speed but better result.
+             * @param iterations Precision of calculation. Higher is better but slower. Defaults to 3.
+             *
+             * @return Matrix<TYPE, ROWS, COLS>
+             */
+            Matrix<TYPE, ROWS, COLS> ePow(size_t iterations = 3) const;
+
+            /**
              * Below are access operators to access matrix values.
              */
 
@@ -515,6 +532,43 @@ namespace VCTR
             }
 
             return diag;
+        }
+
+        template <typename TYPE, size_t ROWS, size_t COLS>
+        Matrix<TYPE, ROWS, COLS> Matrix<TYPE, ROWS, COLS>::pow(size_t power) const 
+        {
+
+            static_assert((COLS == ROWS), "Matrix must be square (NxN) to calculate power!");
+
+            Matrix<TYPE, ROWS, COLS> m = eye();
+
+            for (size_t i = 0; i < power; i++) {
+                m = m*(*this);
+            }
+
+            return m;
+
+        }
+
+        template <typename TYPE, size_t ROWS, size_t COLS>
+        Matrix<TYPE, ROWS, COLS> Matrix<TYPE, ROWS, COLS>::ePow(size_t iterations) const
+        {
+
+            static_assert((COLS == ROWS), "Matrix must be square (NxN) to calculate e to power!");
+
+            Matrix<TYPE, ROWS, COLS> m;
+
+            for (size_t i = 0; i < iterations; i++) {
+                
+                size_t factorial = 1;
+                for (size_t j = 0; j < i; j++) factorial *= j;
+
+                m = m + this->pow(i)/factorial;
+
+            }
+
+            return m;
+
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
