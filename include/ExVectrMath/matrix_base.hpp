@@ -3,6 +3,7 @@
 
 #include "stdint.h"
 #include "math.h"
+#include <initializer_list>
 
 namespace VCTR
 {
@@ -40,6 +41,9 @@ namespace VCTR
              * @param value What value to fill diagonal with.
              */
             Matrix(TYPE value);
+
+
+            Matrix(std::initializer_list<TYPE> array);
 
             /**
              * Conversion constructor. Converts given matrix into type that this matrix is (e.g float -> int)
@@ -309,6 +313,23 @@ namespace VCTR
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
+        Matrix<TYPE, ROWS, COLS>::Matrix(std::initializer_list<TYPE> array)
+        {
+            
+            if (array.size() != ROWS*COLS) return;
+
+            auto it = array.begin();
+            for (size_t row = 0; row < ROWS; row++)
+            {
+                for (size_t col = 0; col < COLS; col++)
+                {
+                    r[row][col] = *it++;
+                }
+            }
+
+        }
+
+        template <typename TYPE, size_t ROWS, size_t COLS>
         template <typename TYPE2>
         Matrix<TYPE, ROWS, COLS>::Matrix(const Matrix<TYPE2, ROWS, COLS> &matrix)
         {
@@ -469,7 +490,7 @@ namespace VCTR
                 }
             }
 
-            return matrix.block<float, ROWS, COLS>(0, COLS);
+            return matrix.block<ROWS, COLS>(0, COLS);
         }
 
         /*template<>
