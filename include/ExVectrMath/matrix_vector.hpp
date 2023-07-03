@@ -17,7 +17,18 @@ namespace VCTR
         public:
             Vector();
 
+            /**
+             * @brief Construct a new Vector object and sets all elements to the given value.
+             * @param value 
+             */
             Vector(const TYPE &value);
+
+            /**
+             * @brief Construct a new vector object using initializer list.
+             * @example Vector<float, 3> vec = {1.0f, 2.0f, 3.0f};
+             * @param array 
+             */
+            Vector(std::initializer_list<TYPE> array);
 
             /**
              * @brief Construct a new Vector object
@@ -80,6 +91,17 @@ namespace VCTR
         {
             for (size_t i = 0; i < ROWS; i++)
                 this->r[i][0] = value;
+        }
+
+        template <typename TYPE, size_t ROWS>
+        Vector<TYPE, ROWS>::Vector(std::initializer_list<TYPE> array)
+        {
+            size_t i = 0;
+            for (auto &element : array)
+            {
+                this->r[i][0] = element;
+                i++;
+            }
         }
 
         template <typename TYPE, size_t ROWS>

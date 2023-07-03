@@ -42,7 +42,11 @@ namespace VCTR
              */
             Matrix(TYPE value);
 
-
+            /**
+             * @brief Construct a new Matrix object using initializer list.
+             * @example Matrix<float, 3, 3> mat = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+             * @param array 
+             */
             Matrix(std::initializer_list<TYPE> array);
 
             /**
@@ -340,7 +344,9 @@ namespace VCTR
             {
                 for (size_t col = 0; col < COLS; col++)
                 {
-                    r[row][col] = *it++;
+
+                    r[row][col] = *it;
+                    it++;
                 }
             }
 
