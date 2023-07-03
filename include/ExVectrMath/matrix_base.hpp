@@ -198,7 +198,7 @@ namespace VCTR
 
             /**
              * Sets part of the matrix using the given ones values.
-             * E.g. Matrix<3, 3>::setBlock<2,2>(1, 1, Matrix<2, 2>); sets the positions marked x:
+             * E.g. Matrix<3, 3>::block<2,2>(Matrix<2, 2>, 1, 1); sets the positions marked x:
              * o o o
              * o x x
              * 0 x x
@@ -211,7 +211,7 @@ namespace VCTR
              * Uses given function to print itsself.
              * @param printf Function to receive a const char*
              */
-            void printTo(void (*printf)(const char *, ...));
+            void printTo(void (*printf)(const char *, ...)) const;
 
             /**
              * Below are math operations.
@@ -723,7 +723,7 @@ namespace VCTR
          * @param printf Function pointer to receive a const char* for format and parameters.
          */
         template <typename TYPE, size_t ROWS, size_t COLS>
-        void Matrix<TYPE, ROWS, COLS>::printTo(void (*printf)(const char *, ...))
+        void Matrix<TYPE, ROWS, COLS>::printTo(void (*printf)(const char *, ...)) const
         {
 
             printf("Matrix: \n[");
