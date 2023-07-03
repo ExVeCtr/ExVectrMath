@@ -2,6 +2,7 @@
 #define EXVECTRMATH_QUATERNION_H
 
 #include "matrix_base.hpp"
+#include "matrix_vector.hpp"
 
 namespace VCTR
 {
@@ -63,9 +64,9 @@ namespace VCTR
             /**
              * @brief Converts this rotation into a vector who's axis in the vector direction and angle [Rad] is the vector length.
              *
-             * @return Matrix<TYPE, 3, 1>
+             * @return Vector<TYPE, 3, 1>
              */
-            Matrix<TYPE, 3, 1> toRotVec() const;
+            Vector<TYPE, 3> toRotVec() const;
 
             /**
              * @brief Conjugates the quaternion. Index 0 sign left as is and 1-3 signs are flipped.
@@ -82,7 +83,7 @@ namespace VCTR
              * @return Matrix<TYPE2, 3, 1>
              */
             template <typename TYPE2>
-            Matrix<TYPE, 3, 1> rotate(const Matrix<TYPE2, 3, 1> &vector) const;
+            Vector<TYPE, 3> rotate(const Matrix<TYPE2, 3, 1> &vector) const;
 
             /**
              * @brief Rotates the given 3x3 matrix using this quaternion.
@@ -129,7 +130,7 @@ namespace VCTR
              * @return Matrix<TYPE2, 3, 1>
              */
             template <typename TYPE2>
-            operator Matrix<TYPE2, 3, 1>() const;
+            operator Vector<TYPE2, 3>() const;
 
             /**
              * @brief Simply converts to a 4x1 matrix containing the w,x,y,z components.
@@ -202,7 +203,7 @@ namespace VCTR
 
         template <typename TYPE>
         template <typename TYPE2>
-        static Quat<TYPE> Quat<TYPE>::fromRotVec(Matrix<TYPE2, 3, 1> rotVec)
+        Quat<TYPE> Quat<TYPE>::fromRotVec(Matrix<TYPE2, 3, 1> rotVec)
         {
 
             TYPE angle = rotVec.magnitude();
@@ -218,10 +219,10 @@ namespace VCTR
         }
 
         template <typename TYPE>
-        Matrix<TYPE, 3, 1> Quat<TYPE>::toRotVec() const
+        Vector<TYPE, 3> Quat<TYPE>::toRotVec() const
         {
 
-            Matrix<TYPE, 3, 1> rotVec;
+            Vector<TYPE, 3> rotVec;
             rotVec.r[0][0] = this->r[1][0];
             rotVec.r[1][0] = this->r[2][0];
             rotVec.r[2][0] = this->r[3][0];
@@ -245,7 +246,7 @@ namespace VCTR
 
         template <typename TYPE>
         template <typename TYPE2>
-        Matrix<TYPE, 3, 1> Quat<TYPE>::rotate(const Matrix<TYPE2, 3, 1> &vector) const
+        Vector<TYPE, 3> Quat<TYPE>::rotate(const Matrix<TYPE2, 3, 1> &vector) const
         {
 
             return (*this) * Quat<TYPE>(vector) * this->conjugate();
@@ -257,11 +258,12 @@ namespace VCTR
         {
 
             Matrix<TYPE, 3, 3> mat;
-            mat.block(this->rotate(matrix.block<3, 1>(0, 0)), 0, 0);
+            /*mat.block(this->rotate(matrix.block<3, 1>(0, 0)), 0, 0);
             mat.block(this->rotate(matrix.block<3, 1>(0, 1)), 0, 1);
-            mat.block(this->rotate(matrix.block<3, 1>(0, 2)), 0, 2);
+            mat.block(this->rotate(matrix.block<3, 1>(0, 2)), 0, 2);*/
 
             return mat;
+
         }
 
         template <typename TYPE>
@@ -346,18 +348,16 @@ namespace VCTR
 
         template <typename TYPE>
         template <typename TYPE2>
-        Quat<TYPE>::operator Matrix<TYPE2, 3, 1>() const
+        Quat<TYPE>::operator Vector<TYPE2, 3>() const
         {
 
-            Matrix<TYPE2, 3, 1> rotVec;
-
+            Vector<TYPE2, 3> rotVec;
             rotVec.r[0][0] = this->r[1][0];
             rotVec.r[1][0] = this->r[2][0];
             rotVec.r[2][0] = this->r[3][0];
 
-            rotVec = rotVec * (acos(this->r[0][0]) * 2 / rotVec.magnitude());
-
             return rotVec;
+
         }
 
         template <typename TYPE>
