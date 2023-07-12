@@ -3,7 +3,7 @@
 
 
 #include "ExVectrMath/matrix_base.hpp"
-#include "ExVectrMath/matrix_types.hpp"
+#include "ExVectrMath/specialised_types.hpp"
 #include "ExVectrMath/matrix_vector.hpp"
 #include "ExVectrMath/matrix_quaternion.hpp"
 
