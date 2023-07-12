@@ -45,7 +45,7 @@ namespace VCTR
             /**
              * @brief Construct a new Matrix object using initializer list.
              * @example Matrix<float, 3, 3> mat = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-             * @param array 
+             * @param array
              */
             Matrix(std::initializer_list<TYPE> array);
 
@@ -138,13 +138,13 @@ namespace VCTR
             /**
              * @brief Calculates this matrix to power given.
              * @note Only powers > 0!
-             * 
+             *
              * @return Matrix<TYPE, ROWS, COLS>
              */
             Matrix<TYPE, ROWS, COLS> pow(size_t power) const;
 
             /**
-             * @brief Calculates e to power of this matrix. 
+             * @brief Calculates e to power of this matrix.
              * @note Approximate calculation. Use increase param iterations for slower speed but better result.
              * @param iterations Precision of calculation. Higher is better but slower. Defaults to 3.
              *
@@ -220,6 +220,11 @@ namespace VCTR
             /**
              * Below are math operations.
              */
+
+            /**
+             * Negates all values in the matrix.
+             */
+            Matrix<TYPE, ROWS, COLS> operator-() const;
 
             /**
              * Adds 2 matrices together.
@@ -336,8 +341,9 @@ namespace VCTR
         template <typename TYPE, size_t ROWS, size_t COLS>
         Matrix<TYPE, ROWS, COLS>::Matrix(std::initializer_list<TYPE> array)
         {
-            
-            if (array.size() != ROWS*COLS) return;
+
+            if (array.size() != ROWS * COLS)
+                return;
 
             auto it = array.begin();
             for (size_t row = 0; row < ROWS; row++)
@@ -349,7 +355,6 @@ namespace VCTR
                     it++;
                 }
             }
-
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
@@ -551,19 +556,19 @@ namespace VCTR
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
-        Matrix<TYPE, ROWS, COLS> Matrix<TYPE, ROWS, COLS>::pow(size_t power) const 
+        Matrix<TYPE, ROWS, COLS> Matrix<TYPE, ROWS, COLS>::pow(size_t power) const
         {
 
             static_assert((COLS == ROWS), "Matrix must be square (NxN) to calculate power!");
 
             Matrix<TYPE, ROWS, COLS> m = eye();
 
-            for (size_t i = 0; i < power; i++) {
-                m = m*(*this);
+            for (size_t i = 0; i < power; i++)
+            {
+                m = m * (*this);
             }
 
             return m;
-
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
@@ -574,17 +579,17 @@ namespace VCTR
 
             Matrix<TYPE, ROWS, COLS> m;
 
-            for (size_t i = 0; i < iterations; i++) {
-                
+            for (size_t i = 0; i < iterations; i++)
+            {
+
                 size_t factorial = 1;
-                for (size_t j = 0; j < i; j++) factorial *= j;
+                for (size_t j = 0; j < i; j++)
+                    factorial *= j;
 
-                m = m + this->pow(i)/factorial;
-
+                m = m + this->pow(i) / factorial;
             }
 
             return m;
-
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
@@ -725,7 +730,7 @@ namespace VCTR
         }
 
         /**
-         * Uses given function to print itself. Expected to work like a normal printf function.
+         * Uses given function to print itself. Given print function is expected to work like a normal printf function.
          * @param printf Function pointer to receive a const char* for format and parameters.
          */
         template <typename TYPE, size_t ROWS, size_t COLS>
@@ -746,6 +751,23 @@ namespace VCTR
             }
 
             printf("]\n");
+        }
+
+        template <typename TYPE, size_t ROWS, size_t COLS>
+        Matrix<TYPE, ROWS, COLS> Matrix<TYPE, ROWS, COLS>::operator-() const
+        {
+            Matrix<TYPE, ROWS, COLS> m;
+
+            for (size_t row = 0; row < ROWS; row++)
+            {
+                for (size_t col = 0; col < COLS; col++)
+                {
+
+                    m.r[row][col] = -r[row][col];
+                }
+            }
+
+            return m;
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
