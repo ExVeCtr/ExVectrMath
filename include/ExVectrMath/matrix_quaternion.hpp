@@ -92,8 +92,8 @@ namespace VCTR
              * @param matrix
              * @return Matrix<TYPE2, 3, 3>
              */
-            template <typename TYPE2>
-            Matrix<TYPE, 3, 3> rotate(const Matrix<TYPE2, 3, 3> &matrix) const;
+            //template <typename TYPE2>
+            //Matrix<TYPE, 3, 3> rotate(const Matrix<TYPE2, 3, 3> &matrix) const;
 
             /**
              * @brief Does quaternion multiplication. Different than matrix or vector multiplication.
@@ -108,11 +108,9 @@ namespace VCTR
             // template<typename TYPE2>
             // Quat<TYPE> operator* (const Vector<TYPE2, 3>& vector) const;
 
-            template <typename TYPE2>
-            Quat<TYPE> operator*(const TYPE2 &scaler) const;
+            Quat<TYPE> operator*(TYPE scaler) const;
 
-            template <typename TYPE2>
-            Quat<TYPE> operator/(const TYPE2 &divider) const;
+            Quat<TYPE> operator/(TYPE divider) const;
 
             /**
              * @brief Converts to a 3x3 rotation matrix
@@ -209,6 +207,10 @@ namespace VCTR
             TYPE angle = rotVec.magnitude();
             TYPE factor = sin(angle / 2) / angle; // Factor to normalise and scale vector.
 
+            if (!(factor == factor)) { // If factor is NaN, probably because angle/vector is 0.
+                return Quat<TYPE>();
+            }
+
             Quat<TYPE> quat;
             quat.r[0][0] = cos(angle / 2);
             quat.r[1][0] = rotVec.r[0][0] * factor;
@@ -252,19 +254,16 @@ namespace VCTR
             return (*this) * Quat<TYPE>(vector) * this->conjugate();
         }
 
-        template <typename TYPE>
+        /*template <typename TYPE>
         template <typename TYPE2>
         Matrix<TYPE, 3, 3> Quat<TYPE>::rotate(const Matrix<TYPE2, 3, 3> &matrix) const
         {
 
-            Matrix<TYPE, 3, 3> mat;
-            /*mat.block(this->rotate(matrix.block<3, 1>(0, 0)), 0, 0);
-            mat.block(this->rotate(matrix.block<3, 1>(0, 1)), 0, 1);
-            mat.block(this->rotate(matrix.block<3, 1>(0, 2)), 0, 2);*/
+            Matrix<TYPE, 3, 3> mat = (*this);
 
-            return mat;
+            return mat * mat;
 
-        }
+        }*/
 
         template <typename TYPE>
         template <typename TYPE2>
@@ -292,8 +291,7 @@ namespace VCTR
         }*/
 
         template <typename TYPE>
-        template <typename TYPE2>
-        Quat<TYPE> Quat<TYPE>::operator*(const TYPE2 &scaler) const
+        Quat<TYPE> Quat<TYPE>::operator*(TYPE scaler) const
         {
 
             Quat<TYPE> quat(*this);
@@ -312,8 +310,7 @@ namespace VCTR
         }
 
         template <typename TYPE>
-        template <typename TYPE2>
-        Quat<TYPE> Quat<TYPE>::operator/(const TYPE2 &divider) const
+        Quat<TYPE> Quat<TYPE>::operator/(TYPE divider) const
         {
 
             Quat<TYPE> quat(*this);
@@ -334,16 +331,17 @@ namespace VCTR
             mat.r[0][0] = 1 - 2 * (this->r[2][0] * this->r[2][0] + this->r[3][0] * this->r[3][0]);
             mat.r[0][1] = 2 * (this->r[1][0] * this->r[2][0] - this->r[0][0] * this->r[3][0]);
             mat.r[0][2] = 2 * (this->r[0][0] * this->r[2][0] + this->r[1][0] * this->r[3][0]);
+
             mat.r[1][0] = 2 * (this->r[1][0] * this->r[2][0] + this->r[0][0] * this->r[3][0]);
             mat.r[1][1] = 1 - 2 * (this->r[1][0] * this->r[1][0] + this->r[3][0] * this->r[3][0]);
-            ;
             mat.r[1][2] = 2 * (this->r[2][0] * this->r[3][0] - this->r[0][0] * this->r[1][0]);
+
             mat.r[2][0] = 2 * (this->r[1][0] * this->r[3][0] - this->r[0][0] * this->r[2][0]);
             mat.r[2][1] = 2 * (this->r[0][0] * this->r[1][0] + this->r[2][0] * this->r[3][0]);
             mat.r[2][2] = 1 - 2 * (this->r[2][0] * this->r[2][0] + this->r[1][0] * this->r[1][0]);
-            ;
 
             return mat;
+            
         }
 
         template <typename TYPE>

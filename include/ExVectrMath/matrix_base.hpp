@@ -60,7 +60,7 @@ namespace VCTR
              * Conversion constructor. Copies given matrix but only a part of it or all of it depending on size.
              */
             template <typename TYPE2, size_t ROWS2, size_t COLS2>
-            Matrix(size_t rowStart, size_t colStart, const Matrix<TYPE2, ROWS2, COLS2> &mat);
+            Matrix(const Matrix<TYPE2, ROWS2, COLS2> &mat, size_t rowStart = 0, size_t colStart = 0);
 
             /**
              * Below are generators for often needed matrices.
@@ -101,9 +101,10 @@ namespace VCTR
             /**
              * @returns transposed matrix.
              */
-            Matrix<TYPE, COLS, ROWS> getTranspose() const;
+            Matrix<TYPE, COLS, ROWS> transpose() const;
 
             /**
+             * @note NEEDS FIXING
              * @returns matrix determinant.
              */
             TYPE determinant();
@@ -126,7 +127,7 @@ namespace VCTR
              * Used Gauß-Jordan method from https://www.geeksforgeeks.org/finding-inverse-of-a-matrix-using-gauss-jordan-method/
              * @returns inverse of matrix.
              */
-            Matrix<TYPE, ROWS, COLS> getInverse() const;
+            Matrix<TYPE, ROWS, COLS> inverse() const;
 
             /**
              * @brief Get the Diagonal vector of a square matrix
@@ -134,6 +135,15 @@ namespace VCTR
              * @return Matrix<TYPE, ROWS, COLS>
              */
             Matrix<TYPE, ROWS, 1> diagonal() const;
+
+            /**
+             * @brief Computes the cross product of two 3x1 matricies (3D vectors)
+             * @param vecB 3D vector
+             *
+             * @return Matrix<TYPE, 3, 1> (3D vector)
+             */
+            template<typename TYPE2>
+            Matrix<TYPE, 3, 1> cross(const Matrix<TYPE2, 3, 1> &vecB) const;
 
             /**
              * @brief Calculates this matrix to power given.
@@ -209,7 +219,7 @@ namespace VCTR
              * using Matrix<2, 2>'s values.
              */
             template <typename TYPE2, size_t ROWS2, size_t COLS2>
-            Matrix<TYPE, ROWS, COLS> &block(const Matrix<TYPE2, ROWS2, COLS2> &mat, size_t rowStart = 0, size_t colStart = 0);
+            Matrix<TYPE, ROWS, COLS> &block(const Matrix<TYPE2, ROWS2, COLS2> &mat, size_t rowStart, size_t colStart);
 
             /**
              * Uses given function to print itsself.
@@ -374,9 +384,9 @@ namespace VCTR
 
         template <typename TYPE, size_t ROWS, size_t COLS>
         template <typename TYPE2, size_t ROWS2, size_t COLS2>
-        Matrix<TYPE, ROWS, COLS>::Matrix(size_t rowStart, size_t colStart, const Matrix<TYPE2, ROWS2, COLS2> &mat) : Matrix()
+        Matrix<TYPE, ROWS, COLS>::Matrix(const Matrix<TYPE2, ROWS2, COLS2> &mat, size_t rowStart, size_t colStart) : Matrix()
         {
-            block(rowStart, colStart, mat);
+            block(mat, rowStart, colStart);
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
@@ -422,7 +432,7 @@ namespace VCTR
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
-        Matrix<TYPE, COLS, ROWS> Matrix<TYPE, ROWS, COLS>::getTranspose() const
+        Matrix<TYPE, COLS, ROWS> Matrix<TYPE, ROWS, COLS>::transpose() const
         {
 
             Matrix<TYPE, COLS, ROWS> m;
@@ -440,7 +450,7 @@ namespace VCTR
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
-        Matrix<TYPE, ROWS, COLS> Matrix<TYPE, ROWS, COLS>::getInverse() const
+        Matrix<TYPE, ROWS, COLS> Matrix<TYPE, ROWS, COLS>::inverse() const
         {
 
             static_assert((ROWS == COLS), "Matrix must be square (NxN) in order to get inverse. Pseudoinverse might solve the issue.");
@@ -511,14 +521,26 @@ namespace VCTR
             {
 
                 temp = matrix[i][i];
-                for (int j = 0; j < 2 * ROWS; j++)
+                for (int j = 0; j < 2 * COLS; j++)
                 {
 
                     matrix[i][j] = matrix[i][j] / temp;
                 }
             }
 
-            return matrix.block<ROWS, COLS>(0, COLS);
+            Matrix<TYPE, ROWS, COLS> result;
+            for (int i = 0; i < ROWS; i++)
+            {
+
+                for (int j = 0; j < COLS; j++)
+                {
+
+                    result[i][j] = matrix[i][j + COLS];
+                }
+            }
+
+            return result;
+            
         }
 
         /*template<>
@@ -553,6 +575,21 @@ namespace VCTR
             }
 
             return diag;
+        }
+
+        template <typename TYPE, size_t ROWS, size_t COLS>
+        template <typename TYPE2>
+        Matrix<TYPE, 3, 1> Matrix<TYPE, ROWS, COLS>::cross(const Matrix<TYPE2, 3, 1> &vecB) const
+        {
+
+            static_assert((ROWS == 3), "Cross product is only defined for 3x1 vectors.");
+
+            Matrix<TYPE, 3, 1> result;
+            result.r[0][0] = this->r[1][0] * vecB.r[2][0] - this->r[2][0] * vecB.r[1][0];
+            result.r[1][0] = this->r[2][0] * vecB.r[0][0] - this->r[0][0] * vecB.r[2][0];
+            result.r[2][0] = this->r[0][0] * vecB.r[1][0] - this->r[1][0] * vecB.r[0][0];
+
+            return result;
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
@@ -598,7 +635,10 @@ namespace VCTR
 
             static_assert((COLS == ROWS), "Matrix must be square (NxN) to have a determinant");
 
-            if (COLS == 1 && ROWS == 1)
+            if (COLS == 2 && ROWS == 2) // Do the 2x2 case explicitly
+                return r[0][0] * r[1][1] - r[1][0] * r[0][1];
+
+            if (COLS == 1 && ROWS == 1) // Do the 1x1 case explicitly
                 return r[0][0];
 
             TYPE determinant = 0;
@@ -617,7 +657,7 @@ namespace VCTR
                         j2++;
                     }
                 }
-                determinant += pow(-1.0, j1 + 2.0) * r[0][j1] * temp.determinant();
+                determinant += ::pow(-1.0, j1 + 2.0) * r[0][j1] * temp.determinant();
             }
 
             return determinant;
@@ -695,15 +735,12 @@ namespace VCTR
         template <size_t ROWS2, size_t COLS2>
         Matrix<TYPE, ROWS2, COLS2> Matrix<TYPE, ROWS, COLS>::block(size_t rowStart, size_t colStart) const
         {
-
             Matrix<TYPE, ROWS2, COLS2> blockMat;
 
             for (size_t rw = rowStart; rw < ROWS && rw < ROWS2 + rowStart; rw++)
             {
-
                 for (size_t cw = colStart; cw < COLS && cw < COLS2 + colStart; cw++)
                 {
-
                     blockMat.r[rw - rowStart][cw - colStart] = r[rw][cw];
                 }
             }
@@ -716,10 +753,10 @@ namespace VCTR
         Matrix<TYPE, ROWS, COLS> &Matrix<TYPE, ROWS, COLS>::block(const Matrix<TYPE2, ROWS2, COLS2> &mat, size_t rowStart, size_t colStart)
         {
 
-            for (size_t rw = rowStart; rw < ROWS && rw < ROWS2 - rowStart; rw++)
+            for (size_t rw = rowStart; rw < ROWS && rw - rowStart < ROWS2; rw++)
             {
 
-                for (size_t cw = colStart; cw < COLS && cw < COLS2 - colStart; cw++)
+                for (size_t cw = colStart; cw < COLS && cw - colStart < COLS2; cw++)
                 {
 
                     this->r[rw][cw] = mat.r[rw - rowStart][cw - colStart];

@@ -40,13 +40,11 @@ namespace VCTR
             Vector(const Matrix<TYPE2, ROWS, 1> &vectorMatrix);
 
             /**
-             * @brief Cross product of the two vectors
+             * @brief Normalizes the vector
              *
-             * @param vecB
-             * @return Vector<TYPE, 3>
+             * @return TYPE
              */
-            template <typename TYPE2>
-            Vector<TYPE, 3> cross(const Vector<TYPE2, 3> &vecB) const;
+            Vector<TYPE, ROWS> normalize() const;
 
             /**
              * @brief Gets the angle between the vectors
@@ -77,6 +75,7 @@ namespace VCTR
              */
             template <typename TYPE2>
             TYPE operator*(const Vector<TYPE2, ROWS> &vecB) const;
+
         };
 
         template <typename TYPE, size_t ROWS>
@@ -113,18 +112,17 @@ namespace VCTR
         }
 
         template <typename TYPE, size_t ROWS>
-        template <typename TYPE2>
-        Vector<TYPE, 3> Vector<TYPE, ROWS>::cross(const Vector<TYPE2, 3> &vecB) const
+        Vector<TYPE, ROWS> Vector<TYPE, ROWS>::normalize() const
         {
 
-            static_assert((ROWS == 3), "Cross product is only defined for 3x1 vectors.");
+            auto copy = *this;
 
-            Vector<TYPE, 3> result;
-            result.r[0][0] = this->r[1][0] * vecB.r[2][0] - this->r[2][0] * vecB.r[1][0];
-            result.r[1][0] = this->r[2][0] * vecB.r[0][0] - this->r[0][0] * vecB.r[2][0];
-            result.r[2][0] = this->r[0][0] * vecB.r[1][0] - this->r[1][0] * vecB.r[0][0];
+            TYPE mag = copy.magnitude();
 
-            return result;
+            copy = copy / mag;
+
+            return copy;
+
         }
 
         template <typename TYPE, size_t ROWS>
@@ -145,7 +143,10 @@ namespace VCTR
         template <typename TYPE2>
         TYPE Vector<TYPE, ROWS>::operator*(const Vector<TYPE2, ROWS> &vecB) const
         {
-            return (*this).transpose() * vecB;
+            TYPE val = 0;
+            for (size_t i = 0; i < ROWS; i++)
+                val += this->r[i][0] * vecB[i][0];
+            return val;
         }
 
         /*
