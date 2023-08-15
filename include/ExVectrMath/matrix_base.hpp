@@ -677,7 +677,7 @@ namespace VCTR
                 buf += r[i][0] * r[i][0];
             }
 
-            return sqrt(buf);
+            return TYPE(sqrt(buf));
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>

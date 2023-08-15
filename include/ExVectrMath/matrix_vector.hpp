@@ -129,7 +129,7 @@ namespace VCTR
         template <typename TYPE2>
         TYPE Vector<TYPE, ROWS>::getAngleTo(const Vector<TYPE2, ROWS> &vecB) const
         {
-            return acos(((*this) * vecB) / ((*this).magnitude() * vecB.magnitude()));
+            return TYPE(acos(((*this) * vecB) / ((*this).magnitude() * vecB.magnitude())));
         }
 
         template <typename TYPE, size_t ROWS>

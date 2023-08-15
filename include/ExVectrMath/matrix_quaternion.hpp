@@ -162,9 +162,9 @@ namespace VCTR
         Quat<TYPE>::Quat(const Matrix<TYPE, 3, 1> &axis, const TYPE &angle)
         {
 
-            TYPE sa = sin(angle / 2);
+            TYPE sa = TYPE(sin(angle / 2));
 
-            this->r[0][0] = cos(angle / 2);
+            this->r[0][0] = TYPE(cos(angle / 2));
             this->r[1][0] = axis.r[0][0] * sa;
             this->r[2][0] = axis.r[1][0] * sa;
             this->r[3][0] = axis.r[2][0] * sa;
