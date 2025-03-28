@@ -74,7 +74,7 @@ namespace VCTR
              * @return TYPE
              */
             template <typename TYPE2>
-            TYPE operator*(const Vector<TYPE2, ROWS> &vecB) const;
+            TYPE dot(const Vector<TYPE2, ROWS> &vecB) const;
 
         };
 
@@ -129,19 +129,24 @@ namespace VCTR
         template <typename TYPE2>
         TYPE Vector<TYPE, ROWS>::getAngleTo(const Vector<TYPE2, ROWS> &vecB) const
         {
-            return TYPE(acos(((*this) * vecB) / ((*this).magnitude() * vecB.magnitude())));
+            float buf = (*this).magnitude() * vecB.magnitude();
+            if (buf < 0.0001) return TYPE(0);
+            buf = (*this).dot(vecB) / buf;
+            if (buf >= 1.0) buf = 1.0;
+            else if (buf <= -1.0) buf = -1.0;
+            return TYPE(acos(buf));
         }
 
         template <typename TYPE, size_t ROWS>
         template <typename TYPE2>
         Vector<TYPE, ROWS> Vector<TYPE, ROWS>::getProjectionOn(const Vector<TYPE2, ROWS> &vecB) const
         {
-            return ((*this) * vecB) / (vecB * vecB) * vecB;
+            return ((*this).dot(vecB)) / (vecB.dot(vecB)) * vecB;
         }
 
         template <typename TYPE, size_t ROWS>
         template <typename TYPE2>
-        TYPE Vector<TYPE, ROWS>::operator*(const Vector<TYPE2, ROWS> &vecB) const
+        TYPE Vector<TYPE, ROWS>::dot(const Vector<TYPE2, ROWS> &vecB) const
         {
             TYPE val = 0;
             for (size_t i = 0; i < ROWS; i++)
