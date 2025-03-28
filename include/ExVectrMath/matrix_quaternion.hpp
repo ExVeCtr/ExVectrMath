@@ -115,6 +115,13 @@ namespace VCTR
             /**
              * @brief Converts to a 3x3 rotation matrix
              *
+             * @return Matrix<TYPE, 3, 3>
+             */
+            Matrix<TYPE, 3, 3> to3x3RotMat() const;
+
+            /**
+             * @brief Converts to a 3x3 rotation matrix
+             *
              * @tparam TYPE2
              * @return Matrix<TYPE2, 3, 3>
              */
@@ -323,11 +330,9 @@ namespace VCTR
         }
 
         template <typename TYPE>
-        template <typename TYPE2>
-        Quat<TYPE>::operator Matrix<TYPE2, 3, 3>() const
-        {
+        Matrix<TYPE, 3, 3> Quat<TYPE>::to3x3RotMat() const {
 
-            Matrix<TYPE2, 3, 3> mat;
+            Matrix<TYPE, 3, 3> mat;
             mat.r[0][0] = 1 - 2 * (this->r[2][0] * this->r[2][0] + this->r[3][0] * this->r[3][0]);
             mat.r[0][1] = 2 * (this->r[1][0] * this->r[2][0] - this->r[0][0] * this->r[3][0]);
             mat.r[0][2] = 2 * (this->r[0][0] * this->r[2][0] + this->r[1][0] * this->r[3][0]);
@@ -341,7 +346,14 @@ namespace VCTR
             mat.r[2][2] = 1 - 2 * (this->r[2][0] * this->r[2][0] + this->r[1][0] * this->r[1][0]);
 
             return mat;
-            
+
+        }
+
+        template <typename TYPE>
+        template <typename TYPE2>
+        Quat<TYPE>::operator Matrix<TYPE2, 3, 3>() const
+        {
+            return to3x3RotMat();
         }
 
         template <typename TYPE>
