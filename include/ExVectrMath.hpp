@@ -7,6 +7,8 @@
 #include "ExVectrMath/matrix_vector.hpp"
 #include "ExVectrMath/matrix_quaternion.hpp"
 
+#include "ExVectrMath/constants.hpp"
+
 
 
 #endif
