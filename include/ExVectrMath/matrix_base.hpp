@@ -118,10 +118,11 @@ namespace VCTR
 
             /**
              * @brief normalizes a Nx1 vector matrix.
+             * @param zeroReturn If true, then if unable to normalize (zero vector), then zero vector will be returned
              *
              * @return Matrix<TYPE, ROWS, COLS>
              */
-            Matrix<TYPE, ROWS, COLS> normalize() const;
+            Matrix<TYPE, ROWS, COLS> normalize(bool zeroReturn = true) const;
 
             /**
              * Used Gauß-Jordan method from https://www.geeksforgeeks.org/finding-inverse-of-a-matrix-using-gauss-jordan-method/
@@ -201,6 +202,17 @@ namespace VCTR
             const TYPE &operator()(size_t row, size_t column) const;
 
             /**
+             * Copies part of the given matrix into a specified part the this matrix.
+             * E.g. Matrix<3, 3>::block<2,2>(Matrix<2, 2>, 1, 1, 0, 1, 1, 2); sets the positions marked x with y:
+             *      o o o        o y y 
+             *   A  o x x  <- B  o o o 
+             *      o o o        o o o
+             * using Matrix<2, 2>'s values.
+             */
+            template <typename TYPE2, size_t ROWS2, size_t COLS2>
+            Matrix<TYPE, ROWS, COLS> &block(const Matrix<TYPE2, ROWS2, COLS2> &mat, size_t rowStart = 0, size_t colStart = 0, size_t rowFromStart = 0, size_t colFromStart = 0, size_t rowFromNum = ROWS2, size_t colFromNum = COLS2);
+
+            /**
              * Returns part of the matrix.
              * E.g. Matrix<3, 3>::getBlock<2,2>(1, 1); gets the positions marked x:
              * o o o
@@ -218,8 +230,8 @@ namespace VCTR
              * 0 x x
              * using Matrix<2, 2>'s values.
              */
-            template <typename TYPE2, size_t ROWS2, size_t COLS2>
-            Matrix<TYPE, ROWS, COLS> &block(const Matrix<TYPE2, ROWS2, COLS2> &mat, size_t rowStart, size_t colStart);
+            //template <typename TYPE2, size_t ROWS2, size_t COLS2>
+            //Matrix<TYPE, ROWS, COLS> &block(const Matrix<TYPE2, ROWS2, COLS2> &mat, size_t rowStart, size_t colStart);
 
             /**
              * Uses given function to print itsself.
@@ -681,7 +693,7 @@ namespace VCTR
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
-        Matrix<TYPE, ROWS, COLS> Matrix<TYPE, ROWS, COLS>::normalize() const
+        Matrix<TYPE, ROWS, COLS> Matrix<TYPE, ROWS, COLS>::normalize(bool zeroReturn) const
         {
 
             static_assert((COLS == 1), "Matrix must be vector (Nx1) to have be normalized");
@@ -689,6 +701,8 @@ namespace VCTR
             Matrix<TYPE, ROWS, COLS> copy = *this;
 
             TYPE mag = copy.magnitude();
+            if (zeroReturn && mag < 0.0001)
+                return Matrix<TYPE, ROWS, COLS>();
 
             copy = copy / mag;
 
@@ -732,6 +746,23 @@ namespace VCTR
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
+        template <typename TYPE2, size_t ROWS2, size_t COLS2>
+        Matrix<TYPE, ROWS, COLS> &Matrix<TYPE, ROWS, COLS>::block(const Matrix<TYPE2, ROWS2, COLS2> &mat, size_t rowStart, size_t colStart, size_t rowFromStart, size_t colFromStart, size_t rowFromNum, size_t colFromNum)
+        {
+            for (size_t rw = rowStart; rw < ROWS && rw - rowStart + rowFromStart < ROWS2 && rw - rowStart < rowFromNum; rw++)
+            {
+
+                for (size_t cw = colStart; cw < COLS && cw - colStart + colFromStart < COLS2 && cw - colStart < colFromNum; cw++)
+                {
+
+                    this->r[rw][cw] = mat.r[rw - rowStart + rowFromStart][cw - colStart + colFromStart];
+                }
+            }
+
+            return *this;
+        }
+
+        template <typename TYPE, size_t ROWS, size_t COLS>
         template <size_t ROWS2, size_t COLS2>
         Matrix<TYPE, ROWS2, COLS2> Matrix<TYPE, ROWS, COLS>::block(size_t rowStart, size_t colStart) const
         {
@@ -748,7 +779,7 @@ namespace VCTR
             return blockMat;
         }
 
-        template <typename TYPE, size_t ROWS, size_t COLS>
+        /*template <typename TYPE, size_t ROWS, size_t COLS>
         template <typename TYPE2, size_t ROWS2, size_t COLS2>
         Matrix<TYPE, ROWS, COLS> &Matrix<TYPE, ROWS, COLS>::block(const Matrix<TYPE2, ROWS2, COLS2> &mat, size_t rowStart, size_t colStart)
         {
@@ -764,7 +795,7 @@ namespace VCTR
             }
 
             return *this;
-        }
+        }*/
 
         /**
          * Uses given function to print itself. Given print function is expected to work like a normal printf function.
