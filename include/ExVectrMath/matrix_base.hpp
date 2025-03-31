@@ -475,20 +475,20 @@ namespace VCTR
             // Create the augmented matrix
             // Add the identity matrix
             // of order at the end of original matrix.
-            for (int i = 0; i < ROWS; i++)
+            for (size_t i = 0; i < ROWS; i++)
             {
                 matrix[i][i + COLS] = 1;
             }
 
             // Interchange the row of matrix,
             // interchanging of row will start from the last row
-            for (int i = ROWS - 1; i > 0; i--)
+            for (size_t i = ROWS - 1; i > 0; i--)
             {
 
                 // Swapping each and every element of the two rows
                 if (matrix[i - 1][0] < matrix[i][0])
                 {
-                    for (int j = 0; j < 2 * ROWS; j++)
+                    for (size_t j = 0; j < 2 * ROWS; j++)
                     {
                         temp = matrix[i][j];
                         matrix[i][j] = matrix[i - 1][j];
@@ -508,17 +508,17 @@ namespace VCTR
 
             // Replace a row by sum of itself and a
             // constant multiple of another row of the matrix
-            for (int i = 0; i < ROWS; i++)
+            for (size_t i = 0; i < ROWS; i++)
             {
 
-                for (int j = 0; j < ROWS; j++)
+                for (size_t j = 0; j < ROWS; j++)
                 {
 
                     if (j != i)
                     {
 
                         temp = matrix[j][i] / matrix[i][i];
-                        for (int k = 0; k < 2 * ROWS; k++)
+                        for (size_t k = 0; k < 2 * ROWS; k++)
                         {
 
                             matrix[j][k] -= matrix[i][k] * temp;
@@ -529,11 +529,11 @@ namespace VCTR
 
             // Multiply each row by a nonzero integer.
             // Divide row element by the diagonal element
-            for (int i = 0; i < ROWS; i++)
+            for (size_t i = 0; i < ROWS; i++)
             {
 
                 temp = matrix[i][i];
-                for (int j = 0; j < 2 * COLS; j++)
+                for (size_t j = 0; j < 2 * COLS; j++)
                 {
 
                     matrix[i][j] = matrix[i][j] / temp;
@@ -541,10 +541,10 @@ namespace VCTR
             }
 
             Matrix<TYPE, ROWS, COLS> result;
-            for (int i = 0; i < ROWS; i++)
+            for (size_t i = 0; i < ROWS; i++)
             {
 
-                for (int j = 0; j < COLS; j++)
+                for (size_t j = 0; j < COLS; j++)
                 {
 
                     result[i][j] = matrix[i][j + COLS];
