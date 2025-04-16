@@ -44,7 +44,7 @@ namespace VCTR
              *
              * @return TYPE
              */
-            Vector<TYPE, ROWS> normalize() const;
+            //Vector<TYPE, ROWS> normalize() const;
 
             /**
              * @brief Gets the angle between the vectors
@@ -111,7 +111,7 @@ namespace VCTR
                 this->r[i][0] = vectorMatrix[i][0];
         }
 
-        template <typename TYPE, size_t ROWS>
+        /*template <typename TYPE, size_t ROWS>
         Vector<TYPE, ROWS> Vector<TYPE, ROWS>::normalize() const
         {
 
@@ -123,7 +123,7 @@ namespace VCTR
 
             return copy;
 
-        }
+        }*/
 
         template <typename TYPE, size_t ROWS>
         template <typename TYPE2>
