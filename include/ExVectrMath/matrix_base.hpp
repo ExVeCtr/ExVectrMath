@@ -111,18 +111,22 @@ namespace VCTR
 
             /**
              * @brief calculates the magnitude of a vector matrix
+             * @param startRow Starting row to calculate magnitude from. Defaults to 0.
+             * @param endRow Ending row to calculate magnitude from. Defaults to ROWS.
              *
              * @return TYPE
              */
-            TYPE magnitude() const;
+            TYPE magnitude(size_t startRow = 0, size_t endRow = ROWS) const;
 
             /**
              * @brief normalizes a Nx1 vector matrix.
+             * @param startRow Starting row of the vector to be normalized. Defaults to 0.
+             * @param endRow Ending row of the vector to be normalized. Defaults to ROWS.
              * @param zeroReturn If true, then if unable to normalize (zero vector), then zero vector will be returned
              *
              * @return Matrix<TYPE, ROWS, COLS>
              */
-            Matrix<TYPE, ROWS, COLS> normalize(bool zeroReturn = true) const;
+            Matrix<TYPE, ROWS, COLS> normalize(size_t startRow = 0, size_t endRow = ROWS, bool zeroReturn = true) const;
 
             /**
              * Used Gauß-Jordan method from https://www.geeksforgeeks.org/finding-inverse-of-a-matrix-using-gauss-jordan-method/
@@ -220,7 +224,7 @@ namespace VCTR
              * 0 x x
              */
             template <size_t ROWS2, size_t COLS2>
-            Matrix<TYPE, ROWS2, COLS2> block(size_t rowStart, size_t colStart) const;
+            Matrix<TYPE, ROWS2, COLS2> block(size_t rowStart = 0, size_t colStart = 0) const;
 
             /**
              * Sets part of the matrix using the given ones values.
@@ -676,14 +680,14 @@ namespace VCTR
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
-        TYPE Matrix<TYPE, ROWS, COLS>::magnitude() const
+        TYPE Matrix<TYPE, ROWS, COLS>::magnitude(size_t startRow, size_t endRow) const
         {
 
             static_assert((COLS == 1), "Matrix must be vector (Nx1) to have a magnitude");
 
             TYPE buf = 0;
 
-            for (size_t i = 0; i < ROWS; i++)
+            for (size_t i = startRow; i < endRow; i++)
             {
 
                 buf += r[i][0] * r[i][0];
@@ -693,18 +697,22 @@ namespace VCTR
         }
 
         template <typename TYPE, size_t ROWS, size_t COLS>
-        Matrix<TYPE, ROWS, COLS> Matrix<TYPE, ROWS, COLS>::normalize(bool zeroReturn) const
+        Matrix<TYPE, ROWS, COLS> Matrix<TYPE, ROWS, COLS>::normalize(size_t startRow, size_t endRow, bool zeroReturn) const
         {
 
             static_assert((COLS == 1), "Matrix must be vector (Nx1) to have be normalized");
 
             Matrix<TYPE, ROWS, COLS> copy = *this;
 
-            TYPE mag = copy.magnitude();
+            TYPE mag = copy.magnitude(startRow, endRow);
             if (zeroReturn && mag < 0.0001)
                 return Matrix<TYPE, ROWS, COLS>();
 
-            copy = copy / mag;
+
+            for (size_t i = startRow; i < endRow; i++)
+            {
+                copy.r[i][0] = copy.r[i][0] / mag;
+            }
 
             return copy;
         }
