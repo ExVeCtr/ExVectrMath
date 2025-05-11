@@ -86,6 +86,12 @@ namespace VCTR
             Vector<TYPE, 3> rotate(const Matrix<TYPE2, 3, 1> &vector) const;
 
             /**
+             * * @brief Normalizes the quaternion. If the quaternion is not a unit quaternion, it will be converted to a unit quaternion.
+             *
+             */
+            Quat<TYPE> normalize() const;
+
+            /**
              * @brief Rotates the given 3x3 matrix using this quaternion.
              *
              * @tparam TYPE2
@@ -271,6 +277,28 @@ namespace VCTR
             return mat * mat;
 
         }*/
+
+        template <typename TYPE>
+        Quat<TYPE> Quat<TYPE>::normalize() const
+        {
+
+            //static_assert((COLS == 1), "Matrix must be vector (Nx1) to have be normalized");
+
+            Quat<TYPE> copy = *this;
+
+            TYPE mag = copy.magnitude();
+            if (mag < 0.0001)
+                return Quat<TYPE>();
+
+
+            for (size_t i = 0; i < 4; i++)
+            {
+                copy.r[i][0] = copy.r[i][0] / mag;
+            }
+
+            return copy;
+
+        }
 
         template <typename TYPE>
         template <typename TYPE2>
