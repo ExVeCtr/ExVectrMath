@@ -61,10 +61,11 @@ namespace VCTR
              *
              * @tparam TYPE2
              * @param vecB Vector to project onto.
+             * @param isSurfaceNormal If true, the projection is onto a surface, using the given vector as the surfaces normal.
              * @return TYPE
              */
             template <typename TYPE2>
-            Vector<TYPE, ROWS> getProjectionOn(const Vector<TYPE2, ROWS> &vecB) const;
+            Vector<TYPE, ROWS> getProjectionOn(const Vector<TYPE2, ROWS> &vecB, bool isSurfaceNormal = false) const;
 
             /**
              * @brief Calculates the dot product between the two vectors.
@@ -139,9 +140,16 @@ namespace VCTR
 
         template <typename TYPE, size_t ROWS>
         template <typename TYPE2>
-        Vector<TYPE, ROWS> Vector<TYPE, ROWS>::getProjectionOn(const Vector<TYPE2, ROWS> &vecB) const
-        {
-            return ((*this).dot(vecB)) / (vecB.dot(vecB)) * vecB;
+        Vector<TYPE, ROWS> Vector<TYPE, ROWS>::getProjectionOn(const Vector<TYPE2, ROWS> &vecB, bool isSurfaceNormal = false) const
+        {   
+
+            if (!isSurfaceNormal) {
+                return ((*this).dot(vecB)) / (vecB.dot(vecB)) * vecB;
+            }
+                
+            return (*this) - ((*this).dot(vecB)) / (vecB.dot(vecB)) * vecB;
+                
+            //return ((*this).dot(vecB)) / (vecB.dot(vecB)) * vecB;
         }
 
         template <typename TYPE, size_t ROWS>
