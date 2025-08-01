@@ -19,14 +19,14 @@ namespace VCTR
 
             /**
              * @brief Construct a new Vector object and sets all elements to the given value.
-             * @param value 
+             * @param value
              */
             Vector(const TYPE &value);
 
             /**
              * @brief Construct a new vector object using initializer list.
              * @example Vector<float, 3> vec = {1.0f, 2.0f, 3.0f};
-             * @param array 
+             * @param array
              */
             Vector(std::initializer_list<TYPE> array);
 
@@ -44,7 +44,7 @@ namespace VCTR
              *
              * @return TYPE
              */
-            //Vector<TYPE, ROWS> normalize() const;
+            // Vector<TYPE, ROWS> normalize() const;
 
             /**
              * @brief Gets the angle between the vectors
@@ -76,7 +76,6 @@ namespace VCTR
              */
             template <typename TYPE2>
             TYPE dot(const Vector<TYPE2, ROWS> &vecB) const;
-
         };
 
         template <typename TYPE, size_t ROWS>
@@ -131,25 +130,29 @@ namespace VCTR
         TYPE Vector<TYPE, ROWS>::getAngleTo(const Vector<TYPE2, ROWS> &vecB) const
         {
             float buf = (*this).magnitude() * vecB.magnitude();
-            if (buf < 0.0001) return TYPE(0);
+            if (buf < 0.0001)
+                return TYPE(0);
             buf = (*this).dot(vecB) / buf;
-            if (buf >= 1.0) buf = 1.0;
-            else if (buf <= -1.0) buf = -1.0;
+            if (buf >= 1.0)
+                buf = 1.0;
+            else if (buf <= -1.0)
+                buf = -1.0;
             return TYPE(acos(buf));
         }
 
         template <typename TYPE, size_t ROWS>
         template <typename TYPE2>
-        Vector<TYPE, ROWS> Vector<TYPE, ROWS>::getProjectionOn(const Vector<TYPE2, ROWS> &vecB, bool isSurfaceNormal = false) const
-        {   
+        Vector<TYPE, ROWS> Vector<TYPE, ROWS>::getProjectionOn(const Vector<TYPE2, ROWS> &vecB, bool isSurfaceNormal) const
+        {
 
-            if (!isSurfaceNormal) {
+            if (!isSurfaceNormal)
+            {
                 return ((*this).dot(vecB)) / (vecB.dot(vecB)) * vecB;
             }
-                
+
             return (*this) - ((*this).dot(vecB)) / (vecB.dot(vecB)) * vecB;
-                
-            //return ((*this).dot(vecB)) / (vecB.dot(vecB)) * vecB;
+
+            // return ((*this).dot(vecB)) / (vecB.dot(vecB)) * vecB;
         }
 
         template <typename TYPE, size_t ROWS>
