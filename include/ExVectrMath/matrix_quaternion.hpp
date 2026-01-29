@@ -4,412 +4,382 @@
 #include "matrix_base.hpp"
 #include "matrix_vector.hpp"
 
-namespace VCTR
+namespace VCTR {
+namespace Math {
+
+/**
+ * Quaternion matrix class for quaternion calculations.
+ */
+template <typename TYPE> class Quat : public Matrix<TYPE, 4, 1> {
+public:
+  Quat();
+
+  Quat(const TYPE &w, const TYPE &x, const TYPE &y, const TYPE &z);
+
+  /**
+   * @brief Construct a new Quat object from an axis and an angle.
+   * @note Axis must be normalised!
+   *
+   * @param axis 3x1 axis around the rotation is to be.
+   * @param angle Angle [Rad] rotation.
+   */
+  Quat(const Matrix<TYPE, 3, 1> &axis, const TYPE &angle);
+
+  /**
+   * @brief Construct a new Quat object from a 4x1 vector representing a
+   * quaternion.
+   *
+   * @param quaternion 4x1 vector.
+   */
+  template <typename TYPE2> Quat(const Matrix<TYPE2, 4, 1> &quaternion);
+
+  /**
+   * @brief Construct a new Quat object from a vector. X,Y,Z are set to vector
+   * components and W to 0;
+   *
+   * @param rotVector 3x1 Vector to be converted to a quaternion.
+   */
+  template <typename TYPE2> Quat(const Matrix<TYPE2, 3, 1> &vector);
+
+  /**
+   * @brief Construct a new Quat object from a 3x3 rotation matrix.
+   *
+   * @param rotMatrix 3x3 rotation matrix.
+   */
+  // Quat(const Matrix<TYPE, 3, 3>& rotMatrix);
+
+  /**
+   * @brief Creates a quaternion to represent the rotation given by the 3D
+   * Rotation vector who's direction is the axis and length is the angle [Rad].
+   *
+   * @tparam TYPE2
+   * @param rotVec Direction is axis and length is angle [Rad].
+   */
+  template <typename TYPE2>
+  static Quat<TYPE> fromRotVec(Matrix<TYPE2, 3, 1> rotVec);
+
+  /**
+   * @brief Converts this rotation into a vector who's axis in the vector
+   * direction and angle [Rad] is the vector length.
+   *
+   * @return Vector<TYPE, 3, 1>
+   */
+  Vector<TYPE, 3> toRotVec() const;
+
+  /**
+   * @brief Conjugates the quaternion. Index 0 sign left as is and 1-3 signs are
+   * flipped.
+   *
+   * @return Quat<TYPE>
+   */
+  Quat<TYPE> conjugate() const;
+
+  /**
+   * @brief Rotates the given 3x1 vector using this quaternion.
+   *
+   * @tparam TYPE2
+   * @param vector
+   * @return Matrix<TYPE2, 3, 1>
+   */
+  template <typename TYPE2>
+  Vector<TYPE, 3> rotate(const Matrix<TYPE2, 3, 1> &vector) const;
+
+  /**
+   * * @brief Normalizes the quaternion. If the quaternion is not a unit
+   * quaternion, it will be converted to a unit quaternion.
+   *
+   */
+  Quat<TYPE> normalize() const;
+
+  /**
+   * @brief Rotates the given 3x3 matrix using this quaternion.
+   *
+   * @tparam TYPE2
+   * @param matrix
+   * @return Matrix<TYPE2, 3, 3>
+   */
+  // template <typename TYPE2>
+  // Matrix<TYPE, 3, 3> rotate(const Matrix<TYPE2, 3, 3> &matrix) const;
+
+  /**
+   * @brief Does quaternion multiplication. Different than matrix or vector
+   * multiplication.
+   *
+   * @tparam TYPE2
+   * @param quat
+   * @return Quat<TYPE>
+   */
+  template <typename TYPE2> Quat<TYPE> operator*(const Quat<TYPE2> &quat) const;
+
+  // template<typename TYPE2>
+  // Quat<TYPE> operator* (const Vector<TYPE2, 3>& vector) const;
+
+  Quat<TYPE> operator*(TYPE scaler) const;
+
+  Quat<TYPE> operator/(TYPE divider) const;
+
+  /**
+   * @brief Converts to a 3x3 rotation matrix
+   *
+   * @return Matrix<TYPE, 3, 3>
+   */
+  Matrix<TYPE, 3, 3> to3x3RotMat() const;
+
+  /**
+   * @brief Converts to a 3x3 rotation matrix
+   *
+   * @tparam TYPE2
+   * @return Matrix<TYPE2, 3, 3>
+   */
+  template <typename TYPE2> operator Matrix<TYPE2, 3, 3>() const;
+
+  /**
+   * @brief Converts to a vector by setting the x,y,z components and leaving w
+   * out.
+   *
+   * @tparam TYPE2
+   * @return Matrix<TYPE2, 3, 1>
+   */
+  template <typename TYPE2> operator Vector<TYPE2, 3>() const;
+
+  /**
+   * @brief Simply converts to a 4x1 matrix containing the w,x,y,z components.
+   *
+   * @tparam TYPE2
+   * @return Matrix<TYPE2, 4, 1>
+   */
+  template <typename TYPE2> operator Matrix<TYPE2, 4, 1>() const;
+};
+
+template <typename TYPE> Quat<TYPE>::Quat() {
+  this->r[0][0] = 1.0f;
+  this->r[1][0] = 0.0f;
+  this->r[2][0] = 0.0f;
+  this->r[3][0] = 0.0f;
+}
+
+template <typename TYPE>
+Quat<TYPE>::Quat(const TYPE &w, const TYPE &x, const TYPE &y, const TYPE &z) {
+  this->r[0][0] = w;
+  this->r[1][0] = x;
+  this->r[2][0] = y;
+  this->r[3][0] = z;
+}
+
+template <typename TYPE>
+Quat<TYPE>::Quat(const Matrix<TYPE, 3, 1> &axis, const TYPE &angle) {
+  TYPE sa = TYPE(sin(angle / 2));
+
+  this->r[0][0] = TYPE(cos(angle / 2));
+  this->r[1][0] = axis.r[0][0] * sa;
+  this->r[2][0] = axis.r[1][0] * sa;
+  this->r[3][0] = axis.r[2][0] * sa;
+}
+
+template <typename TYPE>
+template <typename TYPE2>
+Quat<TYPE>::Quat(const Matrix<TYPE2, 4, 1> &quaternion) {
+  this->r[0][0] = quaternion.r[0][0];
+  this->r[1][0] = quaternion.r[1][0];
+  this->r[2][0] = quaternion.r[2][0];
+  this->r[3][0] = quaternion.r[3][0];
+}
+
+template <typename TYPE>
+template <typename TYPE2>
+Quat<TYPE>::Quat(const Matrix<TYPE2, 3, 1> &vector) {
+  this->r[0][0] = 0;
+  this->r[1][0] = vector.r[0][0];
+  this->r[2][0] = vector.r[1][0];
+  this->r[3][0] = vector.r[2][0];
+}
+
+/*template<typename TYPE>
+Quat<TYPE>::Quat(const Matrix<TYPE, 3, 3>& rotMatrix) {
+
+
+
+}*/
+
+template <typename TYPE>
+template <typename TYPE2>
+Quat<TYPE> Quat<TYPE>::fromRotVec(Matrix<TYPE2, 3, 1> rotVec) {
+  TYPE angle = rotVec.magnitude();
+  TYPE factor = sin(angle / 2) / angle; // Factor to normalise and scale vector.
+
+  if (!(factor ==
+        factor)) { // If factor is NaN, probably because angle/vector is 0.
+    return Quat<TYPE>();
+  }
+
+  Quat<TYPE> quat;
+  quat.r[0][0] = cos(angle / 2);
+  quat.r[1][0] = rotVec.r[0][0] * factor;
+  quat.r[2][0] = rotVec.r[1][0] * factor;
+  quat.r[3][0] = rotVec.r[2][0] * factor;
+
+  return quat;
+}
+
+template <typename TYPE> Vector<TYPE, 3> Quat<TYPE>::toRotVec() const {
+  Vector<TYPE, 3> rotVec;
+  rotVec.r[0][0] = this->r[1][0];
+  rotVec.r[1][0] = this->r[2][0];
+  rotVec.r[2][0] = this->r[3][0];
+
+  rotVec = rotVec * (acos(this->r[0][0]) * 2 / rotVec.magnitude());
+
+  return rotVec;
+}
+
+template <typename TYPE> Quat<TYPE> Quat<TYPE>::conjugate() const {
+  Quat<TYPE> conj = *this;
+  conj.r[1][0] = -conj.r[1][0];
+  conj.r[2][0] = -conj.r[2][0];
+  conj.r[3][0] = -conj.r[3][0];
+
+  return conj;
+}
+
+template <typename TYPE>
+template <typename TYPE2>
+Vector<TYPE, 3> Quat<TYPE>::rotate(const Matrix<TYPE2, 3, 1> &vector) const {
+  return (*this) * Quat<TYPE>(vector) * this->conjugate();
+}
+
+/*template <typename TYPE>
+template <typename TYPE2>
+Matrix<TYPE, 3, 3> Quat<TYPE>::rotate(const Matrix<TYPE2, 3, 3> &matrix) const
 {
-    namespace Math
-    {
-
-        /**
-         * Quaternion matrix class for quaternion calculations.
-         */
-        template <typename TYPE>
-        class Quat : public Matrix<TYPE, 4, 1>
-        {
-        public:
-            Quat();
-
-            Quat(const TYPE &w, const TYPE &x, const TYPE &y, const TYPE &z);
-
-            /**
-             * @brief Construct a new Quat object from an axis and an angle.
-             * @note Axis must be normalised!
-             *
-             * @param axis 3x1 axis around the rotation is to be.
-             * @param angle Angle [Rad] rotation.
-             */
-            Quat(const Matrix<TYPE, 3, 1> &axis, const TYPE &angle);
-
-            /**
-             * @brief Construct a new Quat object from a 4x1 vector representing a quaternion.
-             *
-             * @param quaternion 4x1 vector.
-             */
-            template <typename TYPE2>
-            Quat(const Matrix<TYPE2, 4, 1> &quaternion);
-
-            /**
-             * @brief Construct a new Quat object from a vector. X,Y,Z are set to vector components and W to 0;
-             *
-             * @param rotVector 3x1 Vector to be converted to a quaternion.
-             */
-            template <typename TYPE2>
-            Quat(const Matrix<TYPE2, 3, 1> &vector);
-
-            /**
-             * @brief Construct a new Quat object from a 3x3 rotation matrix.
-             *
-             * @param rotMatrix 3x3 rotation matrix.
-             */
-            // Quat(const Matrix<TYPE, 3, 3>& rotMatrix);
-
-            /**
-             * @brief Creates a quaternion to represent the rotation given by the 3D Rotation vector who's direction is the axis and length is the angle [Rad].
-             *
-             * @tparam TYPE2
-             * @param rotVec Direction is axis and length is angle [Rad].
-             */
-            template <typename TYPE2>
-            static Quat<TYPE> fromRotVec(Matrix<TYPE2, 3, 1> rotVec);
-
-            /**
-             * @brief Converts this rotation into a vector who's axis in the vector direction and angle [Rad] is the vector length.
-             *
-             * @return Vector<TYPE, 3, 1>
-             */
-            Vector<TYPE, 3> toRotVec() const;
-
-            /**
-             * @brief Conjugates the quaternion. Index 0 sign left as is and 1-3 signs are flipped.
-             *
-             * @return Quat<TYPE>
-             */
-            Quat<TYPE> conjugate() const;
-
-            /**
-             * @brief Rotates the given 3x1 vector using this quaternion.
-             *
-             * @tparam TYPE2
-             * @param vector
-             * @return Matrix<TYPE2, 3, 1>
-             */
-            template <typename TYPE2>
-            Vector<TYPE, 3> rotate(const Matrix<TYPE2, 3, 1> &vector) const;
-
-            /**
-             * * @brief Normalizes the quaternion. If the quaternion is not a unit quaternion, it will be converted to a unit quaternion.
-             *
-             */
-            Quat<TYPE> normalize() const;
-
-            /**
-             * @brief Rotates the given 3x3 matrix using this quaternion.
-             *
-             * @tparam TYPE2
-             * @param matrix
-             * @return Matrix<TYPE2, 3, 3>
-             */
-            //template <typename TYPE2>
-            //Matrix<TYPE, 3, 3> rotate(const Matrix<TYPE2, 3, 3> &matrix) const;
-
-            /**
-             * @brief Does quaternion multiplication. Different than matrix or vector multiplication.
-             *
-             * @tparam TYPE2
-             * @param quat
-             * @return Quat<TYPE>
-             */
-            template <typename TYPE2>
-            Quat<TYPE> operator*(const Quat<TYPE2> &quat) const;
-
-            // template<typename TYPE2>
-            // Quat<TYPE> operator* (const Vector<TYPE2, 3>& vector) const;
-
-            Quat<TYPE> operator*(TYPE scaler) const;
-
-            Quat<TYPE> operator/(TYPE divider) const;
-
-            /**
-             * @brief Converts to a 3x3 rotation matrix
-             *
-             * @return Matrix<TYPE, 3, 3>
-             */
-            Matrix<TYPE, 3, 3> to3x3RotMat() const;
-
-            /**
-             * @brief Converts to a 3x3 rotation matrix
-             *
-             * @tparam TYPE2
-             * @return Matrix<TYPE2, 3, 3>
-             */
-            template <typename TYPE2>
-            operator Matrix<TYPE2, 3, 3>() const;
-
-            /**
-             * @brief Converts to a vector by setting the x,y,z components and leaving w out.
-             *
-             * @tparam TYPE2
-             * @return Matrix<TYPE2, 3, 1>
-             */
-            template <typename TYPE2>
-            operator Vector<TYPE2, 3>() const;
-
-            /**
-             * @brief Simply converts to a 4x1 matrix containing the w,x,y,z components.
-             *
-             * @tparam TYPE2
-             * @return Matrix<TYPE2, 4, 1>
-             */
-            template <typename TYPE2>
-            operator Matrix<TYPE2, 4, 1>() const;
-        };
-
-        template <typename TYPE>
-        Quat<TYPE>::Quat()
-        {
-            this->r[0][0] = 1.0f;
-            this->r[1][0] = 0.0f;
-            this->r[2][0] = 0.0f;
-            this->r[3][0] = 0.0f;
-        }
-
-        template <typename TYPE>
-        Quat<TYPE>::Quat(const TYPE &w, const TYPE &x, const TYPE &y, const TYPE &z)
-        {
-            this->r[0][0] = w;
-            this->r[1][0] = x;
-            this->r[2][0] = y;
-            this->r[3][0] = z;
-        }
-
-        template <typename TYPE>
-        Quat<TYPE>::Quat(const Matrix<TYPE, 3, 1> &axis, const TYPE &angle)
-        {
-
-            TYPE sa = TYPE(sin(angle / 2));
-
-            this->r[0][0] = TYPE(cos(angle / 2));
-            this->r[1][0] = axis.r[0][0] * sa;
-            this->r[2][0] = axis.r[1][0] * sa;
-            this->r[3][0] = axis.r[2][0] * sa;
-        }
-
-        template <typename TYPE>
-        template <typename TYPE2>
-        Quat<TYPE>::Quat(const Matrix<TYPE2, 4, 1> &quaternion)
-        {
-
-            this->r[0][0] = quaternion.r[0][0];
-            this->r[1][0] = quaternion.r[1][0];
-            this->r[2][0] = quaternion.r[2][0];
-            this->r[3][0] = quaternion.r[3][0];
-        }
-
-        template <typename TYPE>
-        template <typename TYPE2>
-        Quat<TYPE>::Quat(const Matrix<TYPE2, 3, 1> &vector)
-        {
-
-            this->r[0][0] = 0;
-            this->r[1][0] = vector.r[0][0];
-            this->r[2][0] = vector.r[1][0];
-            this->r[3][0] = vector.r[2][0];
-        }
-
-        /*template<typename TYPE>
-        Quat<TYPE>::Quat(const Matrix<TYPE, 3, 3>& rotMatrix) {
-
-
-
-        }*/
-
-        template <typename TYPE>
-        template <typename TYPE2>
-        Quat<TYPE> Quat<TYPE>::fromRotVec(Matrix<TYPE2, 3, 1> rotVec)
-        {
-
-            TYPE angle = rotVec.magnitude();
-            TYPE factor = sin(angle / 2) / angle; // Factor to normalise and scale vector.
-
-            if (!(factor == factor)) { // If factor is NaN, probably because angle/vector is 0.
-                return Quat<TYPE>();
-            }
-
-            Quat<TYPE> quat;
-            quat.r[0][0] = cos(angle / 2);
-            quat.r[1][0] = rotVec.r[0][0] * factor;
-            quat.r[2][0] = rotVec.r[1][0] * factor;
-            quat.r[3][0] = rotVec.r[2][0] * factor;
-
-            return quat;
-        }
-
-        template <typename TYPE>
-        Vector<TYPE, 3> Quat<TYPE>::toRotVec() const
-        {
-
-            Vector<TYPE, 3> rotVec;
-            rotVec.r[0][0] = this->r[1][0];
-            rotVec.r[1][0] = this->r[2][0];
-            rotVec.r[2][0] = this->r[3][0];
-
-            rotVec = rotVec * (acos(this->r[0][0]) * 2 / rotVec.magnitude());
-
-            return rotVec;
-        }
-
-        template <typename TYPE>
-        Quat<TYPE> Quat<TYPE>::conjugate() const
-        {
-
-            Quat<TYPE> conj = *this;
-            conj.r[1][0] = -conj.r[1][0];
-            conj.r[2][0] = -conj.r[2][0];
-            conj.r[3][0] = -conj.r[3][0];
-
-            return conj;
-        }
-
-        template <typename TYPE>
-        template <typename TYPE2>
-        Vector<TYPE, 3> Quat<TYPE>::rotate(const Matrix<TYPE2, 3, 1> &vector) const
-        {
-
-            return (*this) * Quat<TYPE>(vector) * this->conjugate();
-        }
-
-        /*template <typename TYPE>
-        template <typename TYPE2>
-        Matrix<TYPE, 3, 3> Quat<TYPE>::rotate(const Matrix<TYPE2, 3, 3> &matrix) const
-        {
-
-            Matrix<TYPE, 3, 3> mat = (*this);
-
-            return mat * mat;
-
-        }*/
-
-        template <typename TYPE>
-        Quat<TYPE> Quat<TYPE>::normalize() const
-        {
-
-            //static_assert((COLS == 1), "Matrix must be vector (Nx1) to have be normalized");
-
-            Quat<TYPE> copy = *this;
-
-            TYPE mag = copy.magnitude();
-            if (mag < 0.0001)
-                return Quat<TYPE>();
-
-
-            for (size_t i = 0; i < 4; i++)
-            {
-                copy.r[i][0] = copy.r[i][0] / mag;
-            }
-
-            return copy;
-
-        }
-
-        template <typename TYPE>
-        template <typename TYPE2>
-        Quat<TYPE> Quat<TYPE>::operator*(const Quat<TYPE2> &quat) const
-        {
-
-            Quat<TYPE> result(
-                quat.r[0][0] * this->r[0][0] - quat.r[1][0] * this->r[1][0] - quat.r[2][0] * this->r[2][0] - quat.r[3][0] * this->r[3][0],
-                quat.r[0][0] * this->r[1][0] + quat.r[1][0] * this->r[0][0] + quat.r[2][0] * this->r[3][0] - quat.r[3][0] * this->r[2][0],
-                quat.r[0][0] * this->r[2][0] - quat.r[1][0] * this->r[3][0] + quat.r[2][0] * this->r[0][0] + quat.r[3][0] * this->r[1][0],
-                quat.r[0][0] * this->r[3][0] + quat.r[1][0] * this->r[2][0] - quat.r[2][0] * this->r[1][0] + quat.r[3][0] * this->r[0][0]);
-
-            return result;
-        }
-
-        /*
-        template<typename TYPE>
-        template<typename TYPE2>
-        Quat<TYPE> Quat<TYPE>::operator* (const Vector<TYPE2, 3>& vector) const {
-
-            Quat<TYPE> vectorQuat = vector;
-
-            return (*this) * vectorQuat;
-
-        }*/
-
-        template <typename TYPE>
-        Quat<TYPE> Quat<TYPE>::operator*(TYPE scaler) const
-        {
-
-            Quat<TYPE> quat(*this);
-            quat.r[0][0] = quat.r[0][0] * scaler;
-            quat.r[1][0] = quat.r[1][0] * scaler;
-            quat.r[2][0] = quat.r[2][0] * scaler;
-            quat.r[3][0] = quat.r[3][0] * scaler;
-
-            return quat;
-        }
-
-        template <typename TYPE>
-        Quat<TYPE> operator*(const TYPE &scaler, const Quat<TYPE> &right)
-        {
-            return right * scaler;
-        }
-
-        template <typename TYPE>
-        Quat<TYPE> Quat<TYPE>::operator/(TYPE divider) const
-        {
-
-            Quat<TYPE> quat(*this);
-            quat.r[0][0] = quat.r[0][0] / divider;
-            quat.r[1][0] = quat.r[1][0] / divider;
-            quat.r[2][0] = quat.r[2][0] / divider;
-            quat.r[3][0] = quat.r[3][0] / divider;
-
-            return quat;
-        }
-
-        template <typename TYPE>
-        Matrix<TYPE, 3, 3> Quat<TYPE>::to3x3RotMat() const {
-
-            Matrix<TYPE, 3, 3> mat;
-            mat.r[0][0] = 1 - 2 * (this->r[2][0] * this->r[2][0] + this->r[3][0] * this->r[3][0]);
-            mat.r[0][1] = 2 * (this->r[1][0] * this->r[2][0] - this->r[0][0] * this->r[3][0]);
-            mat.r[0][2] = 2 * (this->r[0][0] * this->r[2][0] + this->r[1][0] * this->r[3][0]);
-
-            mat.r[1][0] = 2 * (this->r[1][0] * this->r[2][0] + this->r[0][0] * this->r[3][0]);
-            mat.r[1][1] = 1 - 2 * (this->r[1][0] * this->r[1][0] + this->r[3][0] * this->r[3][0]);
-            mat.r[1][2] = 2 * (this->r[2][0] * this->r[3][0] - this->r[0][0] * this->r[1][0]);
-
-            mat.r[2][0] = 2 * (this->r[1][0] * this->r[3][0] - this->r[0][0] * this->r[2][0]);
-            mat.r[2][1] = 2 * (this->r[0][0] * this->r[1][0] + this->r[2][0] * this->r[3][0]);
-            mat.r[2][2] = 1 - 2 * (this->r[2][0] * this->r[2][0] + this->r[1][0] * this->r[1][0]);
-
-            return mat;
-
-        }
-
-        template <typename TYPE>
-        template <typename TYPE2>
-        Quat<TYPE>::operator Matrix<TYPE2, 3, 3>() const
-        {
-            return to3x3RotMat();
-        }
-
-        template <typename TYPE>
-        template <typename TYPE2>
-        Quat<TYPE>::operator Vector<TYPE2, 3>() const
-        {
-
-            Vector<TYPE2, 3> rotVec;
-            rotVec.r[0][0] = this->r[1][0];
-            rotVec.r[1][0] = this->r[2][0];
-            rotVec.r[2][0] = this->r[3][0];
-
-            return rotVec;
-
-        }
-
-        template <typename TYPE>
-        template <typename TYPE2>
-        Quat<TYPE>::operator Matrix<TYPE2, 4, 1>() const
-        {
-            return *this;
-        }
-
-        using Quat_F = Quat<float>; // For float quaternion types
-
-        using Quat_D = Quat<double>; // For double quaternion types
-
-    }
-} // Namespace end
+
+    Matrix<TYPE, 3, 3> mat = (*this);
+
+    return mat * mat;
+
+}*/
+
+template <typename TYPE> Quat<TYPE> Quat<TYPE>::normalize() const {
+  // static_assert((COLS == 1), "Matrix must be vector (Nx1) to have be
+  // normalized");
+
+  Quat<TYPE> copy = *this;
+
+  TYPE mag = copy.magnitude();
+  if (mag < 0.0001)
+    return Quat<TYPE>();
+
+  for (size_t i = 0; i < 4; i++) {
+    copy.r[i][0] = copy.r[i][0] / mag;
+  }
+
+  return copy;
+}
+
+template <typename TYPE>
+template <typename TYPE2>
+Quat<TYPE> Quat<TYPE>::operator*(const Quat<TYPE2> &rhs) const {
+  const auto &a = *this; // left
+  const auto &b = rhs;   // right
+  return Quat<TYPE>(a.r[0][0] * b.r[0][0] - a.r[1][0] * b.r[1][0] -
+                        a.r[2][0] * b.r[2][0] - a.r[3][0] * b.r[3][0],
+                    a.r[0][0] * b.r[1][0] + a.r[1][0] * b.r[0][0] +
+                        a.r[2][0] * b.r[3][0] - a.r[3][0] * b.r[2][0],
+                    a.r[0][0] * b.r[2][0] - a.r[1][0] * b.r[3][0] +
+                        a.r[2][0] * b.r[0][0] + a.r[3][0] * b.r[1][0],
+                    a.r[0][0] * b.r[3][0] + a.r[1][0] * b.r[2][0] -
+                        a.r[2][0] * b.r[1][0] + a.r[3][0] * b.r[0][0]);
+}
+
+/*
+template<typename TYPE>
+template<typename TYPE2>
+Quat<TYPE> Quat<TYPE>::operator* (const Vector<TYPE2, 3>& vector) const {
+
+    Quat<TYPE> vectorQuat = vector;
+
+    return (*this) * vectorQuat;
+
+}*/
+
+template <typename TYPE> Quat<TYPE> Quat<TYPE>::operator*(TYPE scaler) const {
+  Quat<TYPE> quat(*this);
+  quat.r[0][0] = quat.r[0][0] * scaler;
+  quat.r[1][0] = quat.r[1][0] * scaler;
+  quat.r[2][0] = quat.r[2][0] * scaler;
+  quat.r[3][0] = quat.r[3][0] * scaler;
+
+  return quat;
+}
+
+template <typename TYPE>
+Quat<TYPE> operator*(const TYPE &scaler, const Quat<TYPE> &right) {
+  return right * scaler;
+}
+
+template <typename TYPE> Quat<TYPE> Quat<TYPE>::operator/(TYPE divider) const {
+  Quat<TYPE> quat(*this);
+  quat.r[0][0] = quat.r[0][0] / divider;
+  quat.r[1][0] = quat.r[1][0] / divider;
+  quat.r[2][0] = quat.r[2][0] / divider;
+  quat.r[3][0] = quat.r[3][0] / divider;
+
+  return quat;
+}
+
+template <typename TYPE> Matrix<TYPE, 3, 3> Quat<TYPE>::to3x3RotMat() const {
+  Matrix<TYPE, 3, 3> mat;
+  mat.r[0][0] =
+      1 - 2 * (this->r[2][0] * this->r[2][0] + this->r[3][0] * this->r[3][0]);
+  mat.r[0][1] =
+      2 * (this->r[1][0] * this->r[2][0] - this->r[0][0] * this->r[3][0]);
+  mat.r[0][2] =
+      2 * (this->r[0][0] * this->r[2][0] + this->r[1][0] * this->r[3][0]);
+
+  mat.r[1][0] =
+      2 * (this->r[1][0] * this->r[2][0] + this->r[0][0] * this->r[3][0]);
+  mat.r[1][1] =
+      1 - 2 * (this->r[1][0] * this->r[1][0] + this->r[3][0] * this->r[3][0]);
+  mat.r[1][2] =
+      2 * (this->r[2][0] * this->r[3][0] - this->r[0][0] * this->r[1][0]);
+
+  mat.r[2][0] =
+      2 * (this->r[1][0] * this->r[3][0] - this->r[0][0] * this->r[2][0]);
+  mat.r[2][1] =
+      2 * (this->r[0][0] * this->r[1][0] + this->r[2][0] * this->r[3][0]);
+  mat.r[2][2] =
+      1 - 2 * (this->r[2][0] * this->r[2][0] + this->r[1][0] * this->r[1][0]);
+
+  return mat;
+}
+
+template <typename TYPE>
+template <typename TYPE2>
+Quat<TYPE>::operator Matrix<TYPE2, 3, 3>() const {
+  return to3x3RotMat();
+}
+
+template <typename TYPE>
+template <typename TYPE2>
+Quat<TYPE>::operator Vector<TYPE2, 3>() const {
+  Vector<TYPE2, 3> rotVec;
+  rotVec.r[0][0] = this->r[1][0];
+  rotVec.r[1][0] = this->r[2][0];
+  rotVec.r[2][0] = this->r[3][0];
+
+  return rotVec;
+}
+
+template <typename TYPE>
+template <typename TYPE2>
+Quat<TYPE>::operator Matrix<TYPE2, 4, 1>() const {
+  return *this;
+}
+
+using Quat_F = Quat<float>; // For float quaternion types
+
+using Quat_D = Quat<double>; // For double quaternion types
+
+} // namespace Math
+} // namespace VCTR
 
 #endif
